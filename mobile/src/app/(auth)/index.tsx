@@ -1,0 +1,127 @@
+import { useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Colors, Gold } from '@/constants/theme';
+import { sendSignInCode, verifySignInCode } from '@/lib/auth';
+
+export default function SignInScreen() {
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onSendCode() {
+    if (!email.trim() || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await sendSignInCode(email.trim());
+      setSent(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not send the code. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onVerifyCode() {
+    if (!code.trim() || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await verifySignInCode(email.trim(), code.trim());
+      // Success flips the auth store's session, which flips the root
+      // layout's Stack.Protected guard into (tabs) automatically.
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'That code didn’t work. Check it and try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <ThemedView style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        <ThemedText type="title" style={styles.title}>
+          Someday Board
+        </ThemedText>
+        <ThemedText themeColor="textSecondary" style={styles.subtitle}>
+          A scrapbook wall for the things you keep putting off.
+        </ThemedText>
+
+        {!sent ? (
+          <>
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              placeholder="you@example.com"
+              placeholderTextColor={Colors.light.textSecondary}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+              style={styles.input}
+            />
+            {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
+            <Pressable style={styles.button} onPress={onSendCode} disabled={busy}>
+              {busy ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.buttonText}>Send sign-in code</ThemedText>}
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <ThemedText style={styles.sentMessage}>
+              Check your email for a sign-in code, then enter it below.
+            </ThemedText>
+            <TextInput
+              value={code}
+              onChangeText={setCode}
+              placeholder="code from email"
+              placeholderTextColor={Colors.light.textSecondary}
+              keyboardType="number-pad"
+              style={[styles.input, styles.codeInput]}
+            />
+            {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
+            <Pressable style={styles.button} onPress={onVerifyCode} disabled={busy}>
+              {busy ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.buttonText}>Sign in</ThemedText>}
+            </Pressable>
+            <Pressable onPress={() => setSent(false)} disabled={busy}>
+              <ThemedText themeColor="textSecondary" style={styles.backLink}>
+                Use a different email
+              </ThemedText>
+            </Pressable>
+          </>
+        )}
+      </SafeAreaView>
+    </ThemedView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  safeArea: { flex: 1, justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
+  title: { textAlign: 'center', fontSize: 34, lineHeight: 38 },
+  subtitle: { textAlign: 'center', marginBottom: 24 },
+  sentMessage: { textAlign: 'center', lineHeight: 22 },
+  input: {
+    borderWidth: 1,
+    borderColor: 'rgba(74,42,28,0.2)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: Colors.light.text,
+  },
+  codeInput: { textAlign: 'center', fontSize: 22, letterSpacing: 4 },
+  button: {
+    backgroundColor: Gold,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  error: { color: '#E15B3E' },
+  backLink: { textAlign: 'center', fontSize: 13, marginTop: 4 },
+});

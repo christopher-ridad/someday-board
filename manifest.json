@@ -1,0 +1,16 @@
+{
+  "name": "Someday Board",
+  "short_name": "Someday",
+  "description": "A scrapbook wall for the things you keep putting off.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#C29C6E",
+  "theme_color": "#8C9B65",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
