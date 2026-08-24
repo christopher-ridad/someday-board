@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+# local tool config
+.claude/
+
 # Expo
 .expo/
 dist/
