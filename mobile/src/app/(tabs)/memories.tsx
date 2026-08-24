@@ -4,8 +4,9 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { MemoryCard } from '@/components/memories/MemoryCard';
 import { MemoryDetailModal } from '@/components/memories/MemoryDetailModal';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Gold } from '@/constants/theme';
+import { CorkBackground } from '@/components/ui/CorkBackground';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Colors, Gold } from '@/constants/theme';
 import { useBoardStore } from '@/store/useBoardStore';
 import type { Item } from '@/types/models';
 
@@ -17,7 +18,7 @@ export default function MemoriesScreen() {
   const pendingCount = items.length - done.length;
 
   return (
-    <ThemedView style={styles.container}>
+    <CorkBackground style={styles.container}>
       <View style={styles.safeArea}>
         <View style={styles.statRow}>
           <Stat num={done.length} label="DONE" />
@@ -25,25 +26,30 @@ export default function MemoriesScreen() {
           <Stat num={items.length} label="TOTAL" />
         </View>
 
-        {done.length === 0 ? (
-          <View style={styles.empty}>
-            <ThemedText style={styles.emptyEmoji}>🎞️</ThemedText>
-            <ThemedText themeColor="textSecondary" style={styles.emptyText}>
-              No memories yet.{'\n'}Pull one off the board and go make one.
-            </ThemedText>
-          </View>
-        ) : (
+        {done.length > 0 && (
           <FlatList
             data={done}
             keyExtractor={(item) => item.id}
             numColumns={2}
             contentContainerStyle={styles.grid}
-            renderItem={({ item }) => <MemoryCard item={item} onPress={() => setDetailItem(item)} />}
+            renderItem={({ item, index }) => (
+              // Alternating tilt per card, like photos casually taped into a
+              // scrapbook rather than a perfectly aligned grid.
+              <MemoryCard item={item} rotation={index % 2 === 0 ? -1.4 : 1.1} onPress={() => setDetailItem(item)} />
+            )}
           />
+        )}
+
+        {done.length === 0 && (
+          // Overlays the whole safe area (not just the region below the
+          // stat row) so it centers on the true screen middle.
+          <EmptyState emoji="🎞️" style={StyleSheet.absoluteFill}>
+            {'No memories yet.\nPull one off the board and go make one.'}
+          </EmptyState>
         )}
       </View>
       <MemoryDetailModal item={detailItem} onClose={() => setDetailItem(null)} />
-    </ThemedView>
+    </CorkBackground>
   );
 }
 
@@ -63,12 +69,17 @@ function Stat({ num, label }: { num: number; label: string }) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1 },
-  statRow: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 20 },
-  stat: { alignItems: 'center' },
+  statRow: { flexDirection: 'row', gap: 10, padding: 16 },
+  stat: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 14,
+    backgroundColor: 'rgba(255,251,245,0.92)',
+    borderWidth: 1,
+    borderColor: Colors.light.backgroundSelected,
+    borderRadius: 14,
+  },
   statNum: { fontSize: 26, color: Gold },
   statLabel: { fontSize: 10 },
-  grid: { paddingHorizontal: 8, paddingBottom: 24 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingHorizontal: 40 },
-  emptyEmoji: { fontSize: 40 },
-  emptyText: { textAlign: 'center', lineHeight: 20 },
+  grid: { paddingHorizontal: 8, paddingBottom: 24, paddingTop: 8 },
 });

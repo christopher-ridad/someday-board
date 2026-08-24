@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { PressableScale } from '@/components/ui/PressableScale';
 import { Fonts, Gold } from '@/constants/theme';
 import type { Item, Track } from '@/types/models';
 
@@ -28,12 +29,12 @@ export function ChallengeTicket({ track, item, onDone, onLetGo }: Props) {
         </ThemedText>
         <ThemedText themeColor="textSecondary">Aim to finish by {dueStr}</ThemedText>
         <View style={styles.actions}>
-          <Pressable style={styles.ghostButton} onPress={onLetGo}>
+          <PressableScale style={styles.ghostButton} onPress={onLetGo}>
             <ThemedText>Let it go</ThemedText>
-          </Pressable>
-          <Pressable style={styles.doneButton} onPress={onDone}>
+          </PressableScale>
+          <PressableScale style={styles.doneButton} onPress={onDone}>
             <ThemedText style={styles.doneButtonText}>I did it ✅</ThemedText>
-          </Pressable>
+          </PressableScale>
         </View>
       </ThemedView>
     </View>
@@ -41,16 +42,20 @@ export function ChallengeTicket({ track, item, onDone, onLetGo }: Props) {
 }
 
 const styles = StyleSheet.create({
-  overlay: { position: 'absolute', left: 0, right: 0, bottom: 24, alignItems: 'center' },
+  overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   ticket: {
     width: '88%',
-    borderRadius: 18,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(74,42,28,0.22)',
+    borderStyle: 'dashed',
     padding: 20,
     gap: 8,
+    transform: [{ rotate: '-0.6deg' }],
     shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
     elevation: 6,
   },
   eyebrow: { fontSize: 11 },

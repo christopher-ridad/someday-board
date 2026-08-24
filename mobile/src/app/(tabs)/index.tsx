@@ -9,9 +9,9 @@ import { useBoardPullAnimation } from '@/components/board/useBoardPullAnimation'
 import { WindPullButton } from '@/components/board/WindPullButton';
 import { MemoryDetailModal } from '@/components/memories/MemoryDetailModal';
 import { MemoryModal } from '@/components/memories/MemoryModal';
-import { ThemedText } from '@/components/themed-text';
 import { ConfettiBurst } from '@/components/ui/ConfettiBurst';
 import { CorkBackground } from '@/components/ui/CorkBackground';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { poolForTrack, useBoardStore } from '@/store/useBoardStore';
 import type { Track } from '@/types/models';
 
@@ -65,14 +65,7 @@ export default function BoardScreen() {
         />
 
         <View style={styles.board} onLayout={onLayout}>
-          {items.length === 0 ? (
-            <View style={styles.empty}>
-              <ThemedText style={styles.emptyEmoji}>🍂</ThemedText>
-              <ThemedText themeColor="textSecondary" style={styles.emptyText}>
-                Nothing on the board yet.{'\n'}Add something you keep putting off.
-              </ThemedText>
-            </View>
-          ) : (
+          {items.length > 0 &&
             boardSize.width > 0 && (
               <View style={[styles.notes, currentChallenge && styles.notesDimmed]}>
                 {items.map((item) => (
@@ -89,8 +82,7 @@ export default function BoardScreen() {
                   />
                 ))}
               </View>
-            )
-          )}
+            )}
 
           {currentChallenge ? (
             <ChallengeTicket
@@ -107,6 +99,15 @@ export default function BoardScreen() {
             />
           )}
         </View>
+
+        {items.length === 0 && (
+          // Overlays the whole safe area (not just the region below the
+          // toggle) so it centers on the true screen middle rather than the
+          // middle of the space left over below the header row.
+          <EmptyState emoji="🍂" style={StyleSheet.absoluteFill}>
+            {'Nothing on the board yet.\nAdd something you keep putting off.'}
+          </EmptyState>
+        )}
       </View>
 
       <MemoryModal
@@ -127,7 +128,4 @@ const styles = StyleSheet.create({
   board: { flex: 1 },
   notes: { flex: 1 },
   notesDimmed: { opacity: 0.35 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingHorizontal: 40 },
-  emptyEmoji: { fontSize: 40 },
-  emptyText: { textAlign: 'center', lineHeight: 20 },
 });

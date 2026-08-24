@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
+import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { CorkBackground } from '@/components/ui/CorkBackground';
+import { PressableScale } from '@/components/ui/PressableScale';
 import { Colors, Fonts, Gold } from '@/constants/theme';
 import { sendSignInCode, verifySignInCode } from '@/lib/auth';
 
@@ -44,7 +45,7 @@ export default function SignInScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <CorkBackground style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title" style={styles.title}>
           Someday Board
@@ -53,57 +54,70 @@ export default function SignInScreen() {
           A scrapbook wall for the things you keep putting off.
         </ThemedText>
 
-        {!sent ? (
-          <>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder="you@example.com"
-              placeholderTextColor={Colors.light.textSecondary}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-              style={styles.input}
-            />
-            {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
-            <Pressable style={styles.button} onPress={onSendCode} disabled={busy}>
-              {busy ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.buttonText}>Send sign-in code</ThemedText>}
-            </Pressable>
-          </>
-        ) : (
-          <>
-            <ThemedText style={styles.sentMessage}>
-              Check your email for a sign-in code, then enter it below.
-            </ThemedText>
-            <TextInput
-              value={code}
-              onChangeText={setCode}
-              placeholder="code from email"
-              placeholderTextColor={Colors.light.textSecondary}
-              keyboardType="number-pad"
-              style={[styles.input, styles.codeInput]}
-            />
-            {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
-            <Pressable style={styles.button} onPress={onVerifyCode} disabled={busy}>
-              {busy ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.buttonText}>Sign in</ThemedText>}
-            </Pressable>
-            <Pressable onPress={() => setSent(false)} disabled={busy}>
-              <ThemedText themeColor="textSecondary" style={styles.backLink}>
-                Use a different email
-              </ThemedText>
-            </Pressable>
-          </>
-        )}
+        <View style={styles.card}>
+          {!sent ? (
+            <>
+              <TextInput
+                value={email}
+                onChangeText={setEmail}
+                placeholder="you@example.com"
+                placeholderTextColor={Colors.light.textSecondary}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="email-address"
+                style={styles.input}
+              />
+              {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
+              <PressableScale style={styles.button} onPress={onSendCode} disabled={busy}>
+                {busy ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.buttonText}>Send sign-in code</ThemedText>}
+              </PressableScale>
+            </>
+          ) : (
+            <>
+              <ThemedText style={styles.sentMessage}>Check your email for a sign-in code, then enter it below.</ThemedText>
+              <TextInput
+                value={code}
+                onChangeText={setCode}
+                placeholder="code from email"
+                placeholderTextColor={Colors.light.textSecondary}
+                keyboardType="number-pad"
+                style={[styles.input, styles.codeInput]}
+              />
+              {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
+              <PressableScale style={styles.button} onPress={onVerifyCode} disabled={busy}>
+                {busy ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.buttonText}>Sign in</ThemedText>}
+              </PressableScale>
+              <PressableScale onPress={() => setSent(false)} disabled={busy}>
+                <ThemedText themeColor="textSecondary" style={styles.backLink}>
+                  Use a different email
+                </ThemedText>
+              </PressableScale>
+            </>
+          )}
+        </View>
       </SafeAreaView>
-    </ThemedView>
+    </CorkBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  safeArea: { flex: 1, justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
-  title: { textAlign: 'center', fontSize: 34, lineHeight: 38 },
-  subtitle: { textAlign: 'center', marginBottom: 24 },
+  safeArea: { flex: 1, justifyContent: 'center', paddingHorizontal: 28 },
+  title: { textAlign: 'center', fontSize: 34, lineHeight: 38, transform: [{ rotate: '-1deg' }] },
+  subtitle: { textAlign: 'center', marginTop: 6, marginBottom: 24 },
+  card: {
+    gap: 16,
+    padding: 24,
+    backgroundColor: 'rgba(255,251,245,0.95)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(196,178,138,0.4)',
+    shadowColor: '#4A2A1C',
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 5,
+  },
   sentMessage: { textAlign: 'center', lineHeight: 22 },
   input: {
     borderWidth: 1,
@@ -112,6 +126,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
+    fontFamily: Fonts.body,
     color: Colors.light.text,
   },
   codeInput: { textAlign: 'center', fontSize: 22, letterSpacing: 4 },

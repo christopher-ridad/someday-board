@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, StyleSheet, TextInput, View } from 'react-native';
 
 import { ItemRow } from '@/components/list/ItemRow';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Colors, Gold, NoteColors } from '@/constants/theme';
+import { Colors, Fonts, Gold, NoteColors } from '@/constants/theme';
+import { CorkBackground } from '@/components/ui/CorkBackground';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { PressableScale } from '@/components/ui/PressableScale';
 import { useBoardStore } from '@/store/useBoardStore';
 import type { Item } from '@/types/models';
 
@@ -24,7 +26,7 @@ export default function ListScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <CorkBackground style={styles.container}>
       <View style={styles.safeArea}>
         <View style={styles.addRow}>
           <TextInput
@@ -37,29 +39,31 @@ export default function ListScreen() {
             onSubmitEditing={onAdd}
             returnKeyType="done"
           />
-          <Pressable style={styles.addButton} onPress={onAdd}>
+          <PressableScale style={styles.addButton} onPress={onAdd}>
             <ThemedText style={styles.addButtonText}>+</ThemedText>
-          </Pressable>
+          </PressableScale>
         </View>
 
-        {pending.length === 0 ? (
-          <View style={styles.empty}>
-            <ThemedText style={styles.emptyEmoji}>📝</ThemedText>
-            <ThemedText themeColor="textSecondary" style={styles.emptyText}>
-              Nothing on the board yet.{'\n'}Add the thing you&apos;ve been putting off.
-            </ThemedText>
-          </View>
-        ) : (
+        {pending.length > 0 && (
           <FlatList
             data={pending}
             keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.list}
             renderItem={({ item, index }: { item: Item; index: number }) => (
               <ItemRow item={item} dotColor={NoteColors[index % NoteColors.length]} onDelete={() => deleteItem(item.id)} />
             )}
           />
         )}
+
+        {pending.length === 0 && (
+          // Overlays the whole safe area (not just the region below the add
+          // row) so it centers on the true screen middle.
+          <EmptyState emoji="📝" rotation={1} style={StyleSheet.absoluteFill}>
+            {"Nothing on the board yet.\nAdd the thing you've been putting off."}
+          </EmptyState>
+        )}
       </View>
-    </ThemedView>
+    </CorkBackground>
   );
 }
 
@@ -67,6 +71,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1 },
   addRow: { flexDirection: 'row', gap: 10, padding: 16 },
+  list: { paddingHorizontal: 16, paddingBottom: 24 },
   input: {
     flex: 1,
     borderWidth: 1,
@@ -75,11 +80,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
+    fontFamily: Fonts.body,
     color: Colors.light.text,
+    backgroundColor: 'rgba(255,251,245,0.92)',
   },
   addButton: { width: 44, height: 44, borderRadius: 12, backgroundColor: Gold, alignItems: 'center', justifyContent: 'center' },
-  addButtonText: { color: '#fff', fontSize: 22, lineHeight: 24 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingHorizontal: 40 },
-  emptyEmoji: { fontSize: 40 },
-  emptyText: { textAlign: 'center', lineHeight: 20 },
+  addButtonText: { color: '#26301C', fontSize: 22, lineHeight: 24 },
 });

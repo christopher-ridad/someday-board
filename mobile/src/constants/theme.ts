@@ -1,3 +1,5 @@
+// One warm scrapbook palette — the app doesn't have a dark mode (neither
+// does the original web app), so this isn't a light/dark pair.
 export const Colors = {
   light: {
     text: '#4A2A1C',
@@ -5,13 +7,6 @@ export const Colors = {
     backgroundElement: '#FFFBF5',
     backgroundSelected: '#F7E2CB',
     textSecondary: '#A8826C',
-  },
-  dark: {
-    text: '#FDF1E6',
-    background: '#2A1B12',
-    backgroundElement: '#3A2618',
-    backgroundSelected: '#4A3220',
-    textSecondary: '#C7A88E',
   },
 } as const;
 
@@ -45,7 +40,7 @@ export const PinColors = ['#D64545', '#EDA426', '#B9BCC2', '#8C9B65', '#5B7FA6']
 export const Gold = '#8C9B65';
 export const Violet = '#E8703A';
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type ThemeColor = keyof typeof Colors.light;
 
 // Ported from the original web app's Google Fonts: Permanent Marker for
 // big hand-drawn display text (titles, stat numbers), Special Elite

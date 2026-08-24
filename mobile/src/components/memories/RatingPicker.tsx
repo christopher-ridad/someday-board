@@ -1,6 +1,7 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { PressableScale } from '@/components/ui/PressableScale';
 import { Colors, Ratings } from '@/constants/theme';
 
 interface Props {
@@ -12,12 +13,12 @@ export function RatingPicker({ value, onChange }: Props) {
   return (
     <View style={styles.row}>
       {Ratings.map((emoji, index) => (
-        <Pressable
+        <PressableScale
           key={index}
           onPress={() => onChange(index)}
           style={[styles.emojiButton, value === index && styles.emojiButtonActive]}>
           <ThemedText style={styles.emoji}>{emoji}</ThemedText>
-        </Pressable>
+        </PressableScale>
       ))}
     </View>
   );
@@ -34,5 +35,5 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   emojiButtonActive: { borderColor: Colors.light.text, backgroundColor: Colors.light.backgroundSelected },
-  emoji: { fontSize: 26 },
+  emoji: { fontSize: 26, lineHeight: 31 },
 });

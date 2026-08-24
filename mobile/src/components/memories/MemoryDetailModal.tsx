@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Modal, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { PressableScale } from '@/components/ui/PressableScale';
 import { Ratings } from '@/constants/theme';
 import { useBoardStore } from '@/store/useBoardStore';
 import type { Item } from '@/types/models';
@@ -35,9 +36,9 @@ export function MemoryDetailModal({ item, onClose }: Props) {
     <Modal visible={item !== null} animationType="slide" onRequestClose={onClose}>
       <ThemedView style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
-          <Pressable style={styles.closeButton} onPress={onClose} hitSlop={8}>
+          <PressableScale style={styles.closeButton} onPress={onClose} hitSlop={8}>
             <ThemedText style={styles.closeText}>×</ThemedText>
-          </Pressable>
+          </PressableScale>
           <ScrollView contentContainerStyle={styles.content}>
             {photoUrl ? (
               <Image source={{ uri: photoUrl }} style={styles.photo} />
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  placeholderEmoji: { fontSize: 48 },
+  placeholderEmoji: { fontSize: 48, lineHeight: 56 },
   title: { fontSize: 24, lineHeight: 28, marginTop: 8 },
   note: { lineHeight: 21, marginTop: 4 },
 });

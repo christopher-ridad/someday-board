@@ -1,11 +1,12 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RatingPicker } from '@/components/memories/RatingPicker';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { PressableScale } from '@/components/ui/PressableScale';
 import { Colors, Fonts, Gold } from '@/constants/theme';
 import { useBoardStore } from '@/store/useBoardStore';
 
@@ -91,13 +92,13 @@ export function MemoryModal({ itemId, itemText, onClose, onSaved }: Props) {
               {itemText}
             </ThemedText>
 
-            <Pressable style={styles.photoBox} onPress={onPickPhoto}>
+            <PressableScale style={styles.photoBox} onPress={onPickPhoto}>
               {photoUri ? (
                 <Image source={{ uri: photoUri }} style={styles.photo} />
               ) : (
                 <ThemedText themeColor="textSecondary">📷 Add a photo</ThemedText>
               )}
-            </Pressable>
+            </PressableScale>
 
             <TextInput
               value={note}
@@ -111,12 +112,12 @@ export function MemoryModal({ itemId, itemText, onClose, onSaved }: Props) {
             <RatingPicker value={rating} onChange={setRating} />
 
             <View style={styles.actions}>
-              <Pressable style={styles.ghostButton} onPress={close}>
+              <PressableScale style={styles.ghostButton} onPress={close}>
                 <ThemedText>Cancel</ThemedText>
-              </Pressable>
-              <Pressable style={styles.saveButton} onPress={onSave} disabled={saving}>
+              </PressableScale>
+              <PressableScale style={styles.saveButton} onPress={onSave} disabled={saving}>
                 {saving ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.saveButtonText}>Save memory</ThemedText>}
-              </Pressable>
+              </PressableScale>
             </View>
           </SafeAreaView>
         </ThemedView>
@@ -147,6 +148,7 @@ const styles = StyleSheet.create({
     padding: 12,
     minHeight: 70,
     fontSize: 14,
+    fontFamily: Fonts.body,
     color: Colors.light.text,
     textAlignVertical: 'top',
   },
