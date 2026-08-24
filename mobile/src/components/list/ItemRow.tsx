@@ -19,7 +19,9 @@ export function ItemRow({ item, dotColor, onDelete }: Props) {
       </ThemedText>
       {item.claimed_track ? (
         <View style={[styles.lockBadge, { backgroundColor: item.claimed_track === 'week' ? Gold : Violet }]}>
-          <ThemedText style={styles.lockBadgeText}>{item.claimed_track === 'week' ? 'WEEK' : 'MONTH'}</ThemedText>
+          <ThemedText type="label" style={styles.lockBadgeText}>
+            {item.claimed_track === 'week' ? 'WEEK' : 'MONTH'}
+          </ThemedText>
         </View>
       ) : (
         <Pressable onPress={onDelete} hitSlop={8}>
@@ -46,5 +48,5 @@ const styles = StyleSheet.create({
   text: { flex: 1, fontSize: 15 },
   delete: { fontSize: 22, paddingHorizontal: 6 },
   lockBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-  lockBadgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+  lockBadgeText: { color: '#fff', fontSize: 10 },
 });

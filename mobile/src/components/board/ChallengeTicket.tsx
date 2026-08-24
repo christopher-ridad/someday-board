@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Gold } from '@/constants/theme';
+import { Fonts, Gold } from '@/constants/theme';
 import type { Item, Track } from '@/types/models';
 
 interface Props {
@@ -20,7 +20,7 @@ export function ChallengeTicket({ track, item, onDone, onLetGo }: Props) {
   return (
     <View style={styles.overlay} pointerEvents="box-none">
       <ThemedView style={styles.ticket}>
-        <ThemedText themeColor="textSecondary" style={styles.eyebrow}>
+        <ThemedText type="label" themeColor="textSecondary" style={styles.eyebrow}>
           CURRENT {track === 'week' ? 'WEEK' : 'MONTH'} CHALLENGE
         </ThemedText>
         <ThemedText type="title" style={styles.title}>
@@ -53,10 +53,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
   },
-  eyebrow: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
+  eyebrow: { fontSize: 11 },
   title: { fontSize: 20, lineHeight: 24 },
   actions: { flexDirection: 'row', gap: 10, marginTop: 8 },
   ghostButton: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(0,0,0,0.15)' },
   doneButton: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12, backgroundColor: Gold },
-  doneButtonText: { color: '#fff', fontWeight: '700' },
+  doneButtonText: { color: '#fff', fontFamily: Fonts.bodyBold },
 });

@@ -36,7 +36,8 @@
           "photosPermission": "Someday Board uses your photos to save the memory picture for something you completed.",
           "cameraPermission": "Someday Board uses your camera to take the memory picture for something you completed."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Ratings } from '@/constants/theme';
+import { Colors, Fonts, Ratings } from '@/constants/theme';
 import { useBoardStore } from '@/store/useBoardStore';
 import type { Item } from '@/types/models';
 
@@ -62,6 +62,6 @@ const styles = StyleSheet.create({
   },
   photo: { width: '100%', height: '100%' },
   placeholderEmoji: { fontSize: 30 },
-  title: { fontSize: 13, fontWeight: '600' },
+  title: { fontSize: 13, fontFamily: Fonts.bodySemiBold },
   date: { fontSize: 11 },
 });

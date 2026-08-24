@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ItemRow } from '@/components/list/ItemRow';
 import { ThemedText } from '@/components/themed-text';
@@ -26,7 +25,7 @@ export default function ListScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <View style={styles.safeArea}>
         <View style={styles.addRow}>
           <TextInput
             value={text}
@@ -59,7 +58,7 @@ export default function ListScreen() {
             )}
           />
         )}
-      </SafeAreaView>
+      </View>
     </ThemedView>
   );
 }

@@ -1,7 +1,6 @@
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import type Explosion from 'react-native-confetti-cannon';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChallengeTicket } from '@/components/board/ChallengeTicket';
 import { ScrapNote } from '@/components/board/ScrapNote';
@@ -11,8 +10,8 @@ import { WindPullButton } from '@/components/board/WindPullButton';
 import { MemoryDetailModal } from '@/components/memories/MemoryDetailModal';
 import { MemoryModal } from '@/components/memories/MemoryModal';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { ConfettiBurst } from '@/components/ui/ConfettiBurst';
+import { CorkBackground } from '@/components/ui/CorkBackground';
 import { poolForTrack, useBoardStore } from '@/store/useBoardStore';
 import type { Track } from '@/types/models';
 
@@ -44,9 +43,19 @@ export default function BoardScreen() {
   const completingItem = items.find((i) => i.id === completingItemId);
   const detailItem = items.find((i) => i.id === detailItemId) ?? null;
 
+  // Stable across re-renders (unlike inline arrow functions closing over
+  // `item` in the .map() below) so ScrapNote's memoized gesture doesn't need
+  // to be torn down and rebuilt whenever the board re-renders — recreating
+  // a note's native gesture recognizer while a drag on it is mid-touch is a
+  // real way to crash native-side.
+  const handleDragEnd = useCallback((itemId: string, xPct: number, yPct: number) => {
+    useBoardStore.getState().updatePosition(itemId, xPct, yPct);
+  }, []);
+  const handleOpenDetail = useCallback((itemId: string) => setDetailItemId(itemId), []);
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <CorkBackground style={styles.container}>
+      <View style={styles.safeArea}>
         <TrackToggle
           track={activeTrack}
           onChange={setActiveTrack}
@@ -75,8 +84,8 @@ export default function BoardScreen() {
                     phase={phase}
                     winnerId={winnerId}
                     dragDisabled={pulling}
-                    onDragEnd={(xPct, yPct) => useBoardStore.getState().updatePosition(item.id, xPct, yPct)}
-                    onPress={() => setDetailItemId(item.id)}
+                    onDragEnd={handleDragEnd}
+                    onPress={handleOpenDetail}
                   />
                 ))}
               </View>
@@ -98,7 +107,7 @@ export default function BoardScreen() {
             />
           )}
         </View>
-      </SafeAreaView>
+      </View>
 
       <MemoryModal
         itemId={completingItemId}
@@ -108,7 +117,7 @@ export default function BoardScreen() {
       />
       <MemoryDetailModal item={detailItem} onClose={() => setDetailItemId(null)} />
       <ConfettiBurst ref={confettiRef} />
-    </ThemedView>
+    </CorkBackground>
   );
 }
 

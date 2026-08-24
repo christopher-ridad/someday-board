@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MemoryCard } from '@/components/memories/MemoryCard';
 import { MemoryDetailModal } from '@/components/memories/MemoryDetailModal';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Gold } from '@/constants/theme';
 import { useBoardStore } from '@/store/useBoardStore';
 import type { Item } from '@/types/models';
 
@@ -18,7 +18,7 @@ export default function MemoriesScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <View style={styles.safeArea}>
         <View style={styles.statRow}>
           <Stat num={done.length} label="DONE" />
           <Stat num={pendingCount} label="WAITING" />
@@ -41,7 +41,7 @@ export default function MemoriesScreen() {
             renderItem={({ item }) => <MemoryCard item={item} onPress={() => setDetailItem(item)} />}
           />
         )}
-      </SafeAreaView>
+      </View>
       <MemoryDetailModal item={detailItem} onClose={() => setDetailItem(null)} />
     </ThemedView>
   );
@@ -50,8 +50,10 @@ export default function MemoriesScreen() {
 function Stat({ num, label }: { num: number; label: string }) {
   return (
     <View style={styles.stat}>
-      <ThemedText style={styles.statNum}>{num}</ThemedText>
-      <ThemedText themeColor="textSecondary" style={styles.statLabel}>
+      <ThemedText type="title" style={styles.statNum}>
+        {num}
+      </ThemedText>
+      <ThemedText type="label" themeColor="textSecondary" style={styles.statLabel}>
         {label}
       </ThemedText>
     </View>
@@ -63,8 +65,8 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   statRow: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 20 },
   stat: { alignItems: 'center' },
-  statNum: { fontSize: 26, fontWeight: '700' },
-  statLabel: { fontSize: 11, letterSpacing: 0.5 },
+  statNum: { fontSize: 26, color: Gold },
+  statLabel: { fontSize: 10 },
   grid: { paddingHorizontal: 8, paddingBottom: 24 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingHorizontal: 40 },
   emptyEmoji: { fontSize: 40 },

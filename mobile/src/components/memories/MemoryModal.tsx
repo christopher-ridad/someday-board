@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { RatingPicker } from '@/components/memories/RatingPicker';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Colors, Gold } from '@/constants/theme';
+import { Colors, Fonts, Gold } from '@/constants/theme';
 import { useBoardStore } from '@/store/useBoardStore';
 
 interface Props {
@@ -153,5 +153,5 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: 12, marginTop: 4 },
   ghostButton: { flex: 1, alignItems: 'center', paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: Colors.light.backgroundSelected },
   saveButton: { flex: 1, alignItems: 'center', paddingVertical: 14, borderRadius: 12, backgroundColor: Gold },
-  saveButtonText: { color: '#fff', fontWeight: '600' },
+  saveButtonText: { color: '#fff', fontFamily: Fonts.bodySemiBold },
 });

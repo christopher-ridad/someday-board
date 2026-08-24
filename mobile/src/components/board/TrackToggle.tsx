@@ -41,7 +41,7 @@ function ToggleButton({
       onPress={onPress}
       disabled={disabled}
       style={[styles.button, active && { backgroundColor: color, borderColor: color }]}>
-      <ThemedText style={active ? styles.activeLabel : styles.label}>
+      <ThemedText type="label" style={active ? styles.activeLabel : styles.label}>
         {label}
         {claimed ? ' ●' : ''}
       </ThemedText>
@@ -59,6 +59,6 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.backgroundSelected,
     alignItems: 'center',
   },
-  label: { fontSize: 13, fontWeight: '600' },
-  activeLabel: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  label: { fontSize: 13 },
+  activeLabel: { fontSize: 13, color: '#fff' },
 });

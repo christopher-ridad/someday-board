@@ -1,4 +1,8 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { PermanentMarker_400Regular } from '@expo-google-fonts/permanent-marker';
+import { SpecialElite_400Regular } from '@expo-google-fonts/special-elite';
+import { WorkSans_400Regular, WorkSans_500Medium, WorkSans_600SemiBold, WorkSans_700Bold } from '@expo-google-fonts/work-sans';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -9,8 +13,16 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const session = useAuthStore((state) => state.session);
   const initializing = useAuthStore((state) => state.initializing);
+  const [fontsLoaded] = useFonts({
+    PermanentMarker_400Regular,
+    SpecialElite_400Regular,
+    WorkSans_400Regular,
+    WorkSans_500Medium,
+    WorkSans_600SemiBold,
+    WorkSans_700Bold,
+  });
 
-  if (initializing) return null;
+  if (initializing || !fontsLoaded) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

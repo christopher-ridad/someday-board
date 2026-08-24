@@ -12,7 +12,9 @@ interface Props {
 export function WindPullButton({ disabled, pulling, onPress }: Props) {
   return (
     <Pressable style={[styles.button, disabled && styles.disabled]} disabled={disabled} onPress={onPress}>
-      <ThemedText style={styles.text}>{pulling ? 'LOOKING…' : 'PULL ONE OFF THE BOARD'}</ThemedText>
+      <ThemedText type="label" style={styles.text}>
+        {pulling ? 'LOOKING…' : 'PULL ONE OFF THE BOARD'}
+      </ThemedText>
     </Pressable>
   );
 }
@@ -34,5 +36,5 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   disabled: { opacity: 0.5 },
-  text: { color: '#fff', fontWeight: '700', letterSpacing: 0.5 },
+  text: { color: '#fff', fontSize: 13 },
 });
