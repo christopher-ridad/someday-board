@@ -101,9 +101,6 @@ export default function BoardScreen() {
         </View>
 
         {items.length === 0 && (
-          // Overlays the whole safe area (not just the region below the
-          // toggle) so it centers on the true screen middle rather than the
-          // middle of the space left over below the header row.
           <EmptyState emoji="🍂" style={StyleSheet.absoluteFill}>
             {'Nothing on the board yet.\nAdd something you keep putting off.'}
           </EmptyState>

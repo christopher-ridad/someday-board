@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { PressableScale } from '@/components/ui/PressableScale';
 import { Colors } from '@/constants/theme';
+import { TRACKS } from '@/constants/tracks';
 import type { Item } from '@/types/models';
 
 interface Props {
@@ -27,7 +28,7 @@ export function ItemRow({ item, dotColor, onDelete }: Props) {
           <ThemedText
             type="label"
             style={[styles.lockBadgeText, { color: item.claimed_track === 'week' ? '#5F6B45' : '#B8481F' }]}>
-            {item.claimed_track === 'week' ? 'WEEK' : 'MONTH'}
+            {TRACKS[item.claimed_track].shortLabel}
           </ThemedText>
         </View>
       ) : (

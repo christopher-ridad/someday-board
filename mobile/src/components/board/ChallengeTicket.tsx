@@ -4,6 +4,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PressableScale } from '@/components/ui/PressableScale';
 import { Fonts, Gold } from '@/constants/theme';
+import { TRACKS } from '@/constants/tracks';
+import { formatShortDate } from '@/lib/date';
 import type { Item, Track } from '@/types/models';
 
 interface Props {
@@ -14,15 +16,13 @@ interface Props {
 }
 
 export function ChallengeTicket({ track, item, onDone, onLetGo }: Props) {
-  const dueStr = item.claimed_due_by
-    ? new Date(item.claimed_due_by).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-    : '';
+  const dueStr = item.claimed_due_by ? formatShortDate(item.claimed_due_by) : '';
 
   return (
     <View style={styles.overlay} pointerEvents="box-none">
       <ThemedView style={styles.ticket}>
         <ThemedText type="label" themeColor="textSecondary" style={styles.eyebrow}>
-          CURRENT {track === 'week' ? 'WEEK' : 'MONTH'} CHALLENGE
+          CURRENT {TRACKS[track].shortLabel} CHALLENGE
         </ThemedText>
         <ThemedText type="title" style={styles.title}>
           {item.text}

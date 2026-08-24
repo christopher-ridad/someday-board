@@ -41,8 +41,6 @@ export default function MemoriesScreen() {
         )}
 
         {done.length === 0 && (
-          // Overlays the whole safe area (not just the region below the
-          // stat row) so it centers on the true screen middle.
           <EmptyState emoji="🎞️" style={StyleSheet.absoluteFill}>
             {'No memories yet.\nPull one off the board and go make one.'}
           </EmptyState>

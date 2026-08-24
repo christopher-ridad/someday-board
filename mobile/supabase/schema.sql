@@ -34,14 +34,6 @@ create policy "memories are owner-only" on memories
 -- Private bucket for memory photos. Objects are stored at `${user_id}/${item_id}.jpg`.
 insert into storage.buckets (id, name, public) values ('memory-photos', 'memory-photos', false);
 
-create policy "memory photos are owner-only (read)" on storage.objects
-  for select using (bucket_id = 'memory-photos' and (storage.foldername(name))[1] = auth.uid()::text);
-
-create policy "memory photos are owner-only (write)" on storage.objects
-  for insert with check (bucket_id = 'memory-photos' and (storage.foldername(name))[1] = auth.uid()::text);
-
-create policy "memory photos are owner-only (update)" on storage.objects
-  for update using (bucket_id = 'memory-photos' and (storage.foldername(name))[1] = auth.uid()::text);
-
-create policy "memory photos are owner-only (delete)" on storage.objects
-  for delete using (bucket_id = 'memory-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "memory photos are owner-only" on storage.objects
+  for all using (bucket_id = 'memory-photos' and (storage.foldername(name))[1] = auth.uid()::text)
+  with check (bucket_id = 'memory-photos' and (storage.foldername(name))[1] = auth.uid()::text);

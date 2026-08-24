@@ -38,7 +38,6 @@ export const NoteColors = [
 export const Ratings = ['😐', '🙂', '😄', '🤩', '🏆'];
 export const PinColors = ['#D64545', '#EDA426', '#B9BCC2', '#8C9B65', '#5B7FA6'];
 export const Gold = '#8C9B65';
-export const Violet = '#E8703A';
 
 export type ThemeColor = keyof typeof Colors.light;
 

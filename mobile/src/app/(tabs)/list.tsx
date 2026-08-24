@@ -56,8 +56,6 @@ export default function ListScreen() {
         )}
 
         {pending.length === 0 && (
-          // Overlays the whole safe area (not just the region below the add
-          // row) so it centers on the true screen middle.
           <EmptyState emoji="📝" rotation={1} style={StyleSheet.absoluteFill}>
             {"Nothing on the board yet.\nAdd the thing you've been putting off."}
           </EmptyState>

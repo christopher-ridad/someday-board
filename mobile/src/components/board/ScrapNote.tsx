@@ -1,13 +1,15 @@
 import { useEffect, useMemo } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
+import { MemoryPhoto } from '@/components/ui/MemoryPhoto';
 import { Pin } from '@/components/ui/Pin';
-import { Fonts, Ratings } from '@/constants/theme';
+import { Fonts } from '@/constants/theme';
+import { useMemoryPhoto } from '@/hooks/useMemoryPhoto';
+import { formatShortDate } from '@/lib/date';
 import { scrapStyle } from '@/lib/scrapLayout';
-import { useBoardStore } from '@/store/useBoardStore';
 import type { Item } from '@/types/models';
 import type { PullPhase } from './useBoardPullAnimation';
 
@@ -34,10 +36,7 @@ interface Props {
 }
 
 export function ScrapNote({ item, boardWidth, boardHeight, phase, winnerId, dragDisabled, onDragEnd, onPress }: Props) {
-  const loadMemory = useBoardStore((state) => state.loadMemory);
-  const photoUrlFor = useBoardStore((state) => state.photoUrlFor);
-  const memory = useBoardStore((state) => state.memories[item.id]);
-  const photoUrl = useBoardStore((state) => (memory?.photo_path ? (state.photoUrls[memory.photo_path] ?? null) : null));
+  const { memory, photoUrl } = useMemoryPhoto(item.done ? item.id : null);
 
   const layout = useMemo(() => scrapStyle(item.id), [item.id]);
   const xPct = item.position_x ?? layout.x;
@@ -45,14 +44,6 @@ export function ScrapNote({ item, boardWidth, boardHeight, phase, winnerId, drag
   const baseLeft = (xPct / 100) * boardWidth;
   const baseTop = (yPct / 100) * boardHeight;
   const noteHeight = item.done ? DONE_HEIGHT : PENDING_HEIGHT;
-
-  useEffect(() => {
-    if (item.done) loadMemory(item.id);
-  }, [item.done, item.id, loadMemory]);
-
-  useEffect(() => {
-    if (memory?.photo_path) photoUrlFor(memory.photo_path);
-  }, [memory?.photo_path, photoUrlFor]);
 
   // posX/posY are the note's absolute left/top in pixels — the single
   // source of truth for where it renders. Earlier this was split between a
@@ -155,9 +146,7 @@ export function ScrapNote({ item, boardWidth, boardHeight, phase, winnerId, drag
     opacity: opacity.value,
   }));
 
-  const dateStr = memory?.created_at
-    ? new Date(memory.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-    : '';
+  const dateStr = memory?.created_at ? formatShortDate(memory.created_at) : '';
 
   return (
     <GestureDetector gesture={pan}>
@@ -166,13 +155,7 @@ export function ScrapNote({ item, boardWidth, boardHeight, phase, winnerId, drag
           <View style={styles.polaroidCard}>
             <View style={styles.photoFrame}>
               <View style={styles.photoWrap}>
-                {photoUrl ? (
-                  <Image source={{ uri: photoUrl }} style={styles.photo} />
-                ) : (
-                  <ThemedText style={styles.placeholderEmoji}>
-                    {memory && memory.rating != null ? Ratings[memory.rating] : '✅'}
-                  </ThemedText>
-                )}
+                <MemoryPhoto photoUrl={photoUrl} rating={memory?.rating} imageStyle={styles.photo} emojiStyle={styles.placeholderEmoji} />
               </View>
             </View>
             <View style={styles.caption}>

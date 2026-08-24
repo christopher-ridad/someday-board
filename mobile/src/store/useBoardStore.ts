@@ -35,6 +35,10 @@ function currentUserId() {
   return userId;
 }
 
+function patchItem(items: Item[], id: string, patch: Partial<Item>): Item[] {
+  return items.map((i) => (i.id === id ? { ...i, ...patch } : i));
+}
+
 // Items claimed as the active week/month challenge are excluded from the
 // pool of items eligible to be pulled next.
 export function poolForTrack(items: Item[]) {
@@ -67,10 +71,9 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   },
 
   updatePosition: async (id, xPct, yPct) => {
-    set((state) => ({
-      items: state.items.map((i) => (i.id === id ? { ...i, position_x: xPct, position_y: yPct } : i)),
-    }));
-    const { error } = await supabase.from('items').update({ position_x: xPct, position_y: yPct }).eq('id', id);
+    const patch = { position_x: xPct, position_y: yPct };
+    set((state) => ({ items: patchItem(state.items, id, patch) }));
+    const { error } = await supabase.from('items').update(patch).eq('id', id);
     if (error) throw error;
   },
 
@@ -80,7 +83,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     const patch = { claimed_track: track, claimed_at: claimedAt.toISOString(), claimed_due_by: dueBy.toISOString() };
     const { error } = await supabase.from('items').update(patch).eq('id', itemId);
     if (error) throw error;
-    set((state) => ({ items: state.items.map((i) => (i.id === itemId ? { ...i, ...patch } : i)) }));
+    set((state) => ({ items: patchItem(state.items, itemId, patch) }));
   },
 
   releaseChallenge: async (track) => {
@@ -89,7 +92,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     const patch = { claimed_track: null, claimed_at: null, claimed_due_by: null };
     const { error } = await supabase.from('items').update(patch).eq('id', item.id);
     if (error) throw error;
-    set((state) => ({ items: state.items.map((i) => (i.id === item.id ? { ...i, ...patch } : i)) }));
+    set((state) => ({ items: patchItem(state.items, item.id, patch) }));
   },
 
   completeItem: async (itemId, { rating, note, photoUri }) => {
@@ -112,7 +115,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     if (itemError) throw itemError;
 
     set((state) => ({
-      items: state.items.map((i) => (i.id === itemId ? { ...i, ...patch } : i)),
+      items: patchItem(state.items, itemId, patch),
       memories: { ...state.memories, [itemId]: memory },
     }));
   },

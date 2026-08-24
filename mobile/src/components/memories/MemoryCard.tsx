@@ -1,11 +1,12 @@
-import { useEffect } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { MemoryPhoto } from '@/components/ui/MemoryPhoto';
 import { Pin } from '@/components/ui/Pin';
 import { PressableScale } from '@/components/ui/PressableScale';
-import { Colors, Fonts, PinColors, Ratings } from '@/constants/theme';
-import { useBoardStore } from '@/store/useBoardStore';
+import { Colors, Fonts, PinColors } from '@/constants/theme';
+import { useMemoryPhoto } from '@/hooks/useMemoryPhoto';
+import { formatShortDate } from '@/lib/date';
 import type { Item } from '@/types/models';
 
 interface Props {
@@ -15,22 +16,9 @@ interface Props {
 }
 
 export function MemoryCard({ item, rotation = 0, onPress }: Props) {
-  const loadMemory = useBoardStore((state) => state.loadMemory);
-  const photoUrlFor = useBoardStore((state) => state.photoUrlFor);
-  const memory = useBoardStore((state) => state.memories[item.id]);
-  const photoUrl = useBoardStore((state) => (memory?.photo_path ? (state.photoUrls[memory.photo_path] ?? null) : null));
+  const { memory, photoUrl } = useMemoryPhoto(item.id);
 
-  useEffect(() => {
-    loadMemory(item.id);
-  }, [item.id, loadMemory]);
-
-  useEffect(() => {
-    if (memory?.photo_path) photoUrlFor(memory.photo_path);
-  }, [memory?.photo_path, photoUrlFor]);
-
-  const dateStr = memory?.created_at
-    ? new Date(memory.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-    : '';
+  const dateStr = memory?.created_at ? formatShortDate(memory.created_at) : '';
   const pinColor = PinColors[item.id.charCodeAt(0) % PinColors.length];
 
   return (
@@ -38,13 +26,7 @@ export function MemoryCard({ item, rotation = 0, onPress }: Props) {
       <PressableScale style={styles.card} onPress={onPress}>
         <View style={styles.photoFrame}>
           <View style={styles.photoWrap}>
-            {photoUrl ? (
-              <Image source={{ uri: photoUrl }} style={styles.photo} />
-            ) : (
-              <ThemedText style={styles.placeholderEmoji}>
-                {memory && memory.rating != null ? Ratings[memory.rating] : '✅'}
-              </ThemedText>
-            )}
+            <MemoryPhoto photoUrl={photoUrl} rating={memory?.rating} imageStyle={styles.photo} emojiStyle={styles.placeholderEmoji} />
           </View>
         </View>
         <View style={styles.body}>

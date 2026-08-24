@@ -10,7 +10,10 @@ interface Props {
 }
 
 // A tilted index card for "nothing here yet" states, shared by Board, List,
-// and Memories so the fix/design only lives in one place.
+// and Memories so the fix/design only lives in one place. Callers pass
+// `style={StyleSheet.absoluteFill}` to overlay the whole safe area (not just
+// the space below whatever header/toolbar sits above it), so the card
+// centers on the true screen middle rather than the leftover space below.
 export function EmptyState({ emoji, children, rotation = -1, style }: Props) {
   return (
     // box-none: when used as a full-area overlay (see Board/List/Memories),
