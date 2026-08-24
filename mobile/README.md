@@ -1,6 +1,6 @@
 # Someday Board (mobile)
 
-The native Expo/React Native rewrite of Someday Board — a corkboard of the things you keep putting off, backed by Supabase. See the original web PWA at the repo root; it's kept as-is and untouched by this rewrite.
+The native Expo/React Native app for Someday Board — a corkboard of the things you keep putting off, backed by Supabase.
 
 ## One-time setup
 
