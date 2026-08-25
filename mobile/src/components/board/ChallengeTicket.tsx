@@ -1,9 +1,9 @@
 import { StyleSheet, View } from 'react-native';
+import Animated, { ZoomIn } from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { PressableScale } from '@/components/ui/PressableScale';
-import { Fonts, Gold } from '@/constants/theme';
+import { Colors, Fonts, Gold } from '@/constants/theme';
 import { TRACKS } from '@/constants/tracks';
 import { formatShortDate } from '@/lib/date';
 import type { Item, Track } from '@/types/models';
@@ -20,7 +20,11 @@ export function ChallengeTicket({ track, item, onDone, onLetGo }: Props) {
 
   return (
     <View style={styles.overlay} pointerEvents="box-none">
-      <ThemedView style={styles.ticket}>
+      {/* Timed to start right as the winning note (ScrapNote.tsx) finishes
+          gliding to this same board-center spot and fades out — so the note
+          visually becomes this ticket rather than one abruptly replacing
+          the other. */}
+      <Animated.View entering={ZoomIn.duration(300)} style={styles.ticket}>
         <ThemedText type="label" themeColor="textSecondary" style={styles.eyebrow}>
           CURRENT {TRACKS[track].shortLabel} CHALLENGE
         </ThemedText>
@@ -30,13 +34,13 @@ export function ChallengeTicket({ track, item, onDone, onLetGo }: Props) {
         <ThemedText themeColor="textSecondary">Aim to finish by {dueStr}</ThemedText>
         <View style={styles.actions}>
           <PressableScale style={styles.ghostButton} onPress={onLetGo}>
-            <ThemedText>Let it go</ThemedText>
+            <ThemedText>Some other day</ThemedText>
           </PressableScale>
           <PressableScale style={styles.doneButton} onPress={onDone}>
             <ThemedText style={styles.doneButtonText}>I did it ✅</ThemedText>
           </PressableScale>
         </View>
-      </ThemedView>
+      </Animated.View>
     </View>
   );
 }
@@ -45,6 +49,7 @@ const styles = StyleSheet.create({
   overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   ticket: {
     width: '88%',
+    backgroundColor: Colors.light.background,
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: 'rgba(74,42,28,0.22)',

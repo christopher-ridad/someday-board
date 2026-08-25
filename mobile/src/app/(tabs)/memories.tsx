@@ -12,9 +12,18 @@ import type { Item } from '@/types/models';
 
 export default function MemoriesScreen() {
   const items = useBoardStore((state) => state.items);
+  const memories = useBoardStore((state) => state.memories);
   const [detailItem, setDetailItem] = useState<Item | null>(null);
 
-  const done = useMemo(() => items.filter((i) => i.done), [items]);
+  // Most recently completed first — memories[id]?.created_at is when it was
+  // actually finished, not item.created_at (when it was first added to the
+  // list), which is what items already come sorted by.
+  const done = useMemo(() => {
+    return items
+      .filter((i) => i.done)
+      .slice()
+      .sort((a, b) => (memories[b.id]?.created_at ?? b.created_at).localeCompare(memories[a.id]?.created_at ?? a.created_at));
+  }, [items, memories]);
   const pendingCount = items.length - done.length;
 
   return (

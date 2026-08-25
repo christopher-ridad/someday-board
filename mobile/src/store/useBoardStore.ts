@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import { TRACKS } from '@/constants/tracks';
+import { placeNewNote, scrapStyle } from '@/lib/scrapLayout';
 import { getSignedPhotoUrl, uploadMemoryPhoto } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -19,9 +20,11 @@ interface BoardState {
   photoUrls: Record<string, string>;
 
   loadItems: () => Promise<void>;
-  addItem: (text: string) => Promise<void>;
+  loadAllMemories: () => Promise<void>;
+  addItem: (text: string, track: Track) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   updatePosition: (id: string, xPct: number, yPct: number) => Promise<void>;
+  updateRotation: (id: string, degrees: number) => Promise<void>;
   claimChallenge: (track: Track, itemId: string) => Promise<void>;
   releaseChallenge: (track: Track) => Promise<void>;
   completeItem: (itemId: string, input: CompleteItemInput) => Promise<void>;
@@ -39,10 +42,15 @@ function patchItem(items: Item[], id: string, patch: Partial<Item>): Item[] {
   return items.map((i) => (i.id === id ? { ...i, ...patch } : i));
 }
 
-// Items claimed as the active week/month challenge are excluded from the
-// pool of items eligible to be pulled next.
-export function poolForTrack(items: Item[]) {
-  return items.filter((i) => !i.done && !i.claimed_track);
+// Items belonging to the other track, already done, or already claimed as
+// the active week/month challenge are excluded from the pool eligible to be
+// pulled next.
+export function poolForTrack(items: Item[], track: Track) {
+  return items.filter((i) => i.track === track && !i.done && !i.claimed_track);
+}
+
+export function isTrackClaimed(items: Item[], track: Track) {
+  return items.some((i) => i.claimed_track === track);
 }
 
 export const useBoardStore = create<BoardState>((set, get) => ({
@@ -58,8 +66,32 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     set({ items: data as Item[], loading: false });
   },
 
-  addItem: async (text) => {
-    const { data, error } = await supabase.from('items').insert({ text }).select().single();
+  // Individual memory rows are otherwise loaded lazily, one per card, as
+  // each MemoryCard mounts (see loadMemory below) — too late to sort the
+  // Memories grid by completion time before it's even rendered. This loads
+  // all of them up front instead.
+  loadAllMemories: async () => {
+    const { data, error } = await supabase.from('memories').select('*');
+    if (error) throw error;
+    const byItemId: Record<string, Memory> = {};
+    for (const memory of data as Memory[]) byItemId[memory.item_id] = memory;
+    set((state) => ({ memories: { ...state.memories, ...byItemId } }));
+  },
+
+  addItem: async (text, track) => {
+    // Places the new note with real clearance from whatever's already on
+    // this track's board — pure random scatter (each note's fallback
+    // position, for anything never explicitly placed) starts overlapping
+    // fast once there are more than a handful of notes.
+    const existing = get()
+      .items.filter((i) => i.track === track && !i.done)
+      .map((i) => {
+        const layout = scrapStyle(i.id);
+        return { x: i.position_x ?? layout.x, y: i.position_y ?? layout.y };
+      });
+    const { x, y } = placeNewNote(existing);
+
+    const { data, error } = await supabase.from('items').insert({ text, track, position_x: x, position_y: y }).select().single();
     if (error) throw error;
     set((state) => ({ items: [...state.items, data as Item] }));
   },
@@ -72,6 +104,13 @@ export const useBoardStore = create<BoardState>((set, get) => ({
 
   updatePosition: async (id, xPct, yPct) => {
     const patch = { position_x: xPct, position_y: yPct };
+    set((state) => ({ items: patchItem(state.items, id, patch) }));
+    const { error } = await supabase.from('items').update(patch).eq('id', id);
+    if (error) throw error;
+  },
+
+  updateRotation: async (id, degrees) => {
+    const patch = { rotation: degrees };
     set((state) => ({ items: patchItem(state.items, id, patch) }));
     const { error } = await supabase.from('items').update(patch).eq('id', id);
     if (error) throw error;

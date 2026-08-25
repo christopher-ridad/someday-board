@@ -1,4 +1,10 @@
 -- Run this once in the Supabase SQL editor for a fresh project.
+--
+-- Already have this schema applied? Run these instead, to pick up columns
+-- added since:
+--   alter table items add column rotation numeric;                                  -- manual note-tilt control
+--   alter table items add column track text not null default 'week'
+--     check (track in ('week', 'month'));                                           -- which board (Week/Month) an item belongs to
 
 create table items (
   id uuid primary key default gen_random_uuid(),
@@ -8,6 +14,10 @@ create table items (
   created_at timestamptz not null default now(),
   position_x numeric,
   position_y numeric,
+  rotation numeric,
+  -- Which board this item belongs to — separate from claimed_track below,
+  -- which tracks whether it's the *currently active* pulled challenge.
+  track text not null default 'week' check (track in ('week', 'month')),
   claimed_track text check (claimed_track in ('week', 'month')),
   claimed_at timestamptz,
   claimed_due_by timestamptz

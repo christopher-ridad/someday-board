@@ -1,6 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RatingPicker } from '@/components/memories/RatingPicker';
@@ -82,55 +82,65 @@ export function MemoryModal({ itemId, itemText, onClose, onSaved }: Props) {
 
   return (
     <Modal visible={itemId !== null} animationType="slide" transparent onRequestClose={close}>
-      <View style={styles.backdrop}>
+      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ThemedView style={styles.sheet}>
           <SafeAreaView edges={['bottom']}>
-            <ThemedText type="title" style={styles.title}>
-              Log this memory
-            </ThemedText>
-            <ThemedText themeColor="textSecondary" style={styles.subtitle}>
-              {itemText}
-            </ThemedText>
+            {/* Bounded by sheet's maxHeight so this can actually scroll —
+                without it, the sheet just grows to fit its content and the
+                note input + Save button end up pushed off-screen under the
+                keyboard with no way to reach them. */}
+            <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              <ThemedText type="title" style={styles.title}>
+                Log this memory
+              </ThemedText>
+              <ThemedText themeColor="textSecondary" style={styles.subtitle}>
+                {itemText}
+              </ThemedText>
 
-            <PressableScale style={styles.photoBox} onPress={onPickPhoto}>
-              {photoUri ? (
-                <Image source={{ uri: photoUri }} style={styles.photo} />
-              ) : (
-                <ThemedText themeColor="textSecondary">📷 Add a photo</ThemedText>
-              )}
-            </PressableScale>
-
-            <TextInput
-              value={note}
-              onChangeText={setNote}
-              placeholder="How did it go? What happened?"
-              placeholderTextColor={Colors.light.textSecondary}
-              style={styles.noteInput}
-              multiline
-            />
-
-            <RatingPicker value={rating} onChange={setRating} />
-
-            <View style={styles.actions}>
-              <PressableScale style={styles.ghostButton} onPress={close}>
-                <ThemedText>Cancel</ThemedText>
+              <PressableScale style={styles.photoBox} onPress={onPickPhoto}>
+                {photoUri ? (
+                  <Image source={{ uri: photoUri }} style={styles.photo} resizeMode="contain" />
+                ) : (
+                  <ThemedText themeColor="textSecondary">📷 Add a photo</ThemedText>
+                )}
               </PressableScale>
-              <PressableScale style={styles.saveButton} onPress={onSave} disabled={saving}>
-                {saving ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.saveButtonText}>Save memory</ThemedText>}
-              </PressableScale>
-            </View>
+
+              <TextInput
+                value={note}
+                onChangeText={setNote}
+                placeholder="How did it go? What happened?"
+                placeholderTextColor={Colors.light.textSecondary}
+                style={styles.noteInput}
+                multiline
+              />
+
+              <RatingPicker value={rating} onChange={setRating} />
+
+              <View style={styles.actions}>
+                <PressableScale style={styles.ghostButton} onPress={close}>
+                  <ThemedText>Cancel</ThemedText>
+                </PressableScale>
+                <PressableScale style={styles.saveButton} onPress={onSave} disabled={saving}>
+                  {saving ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.saveButtonText}>Save memory</ThemedText>}
+                </PressableScale>
+              </View>
+            </ScrollView>
           </SafeAreaView>
         </ThemedView>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, gap: 14 },
+  sheet: { maxHeight: '85%', borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+  content: { padding: 20, gap: 14 },
   title: { fontSize: 22, lineHeight: 26 },
   subtitle: { marginTop: -6 },
+  // Photo can be any aspect ratio the camera/library gives us — "contain"
+  // (not the default "cover") is what keeps the whole picture visible
+  // instead of cropping it to fill this fixed-height box.
   photoBox: {
     height: 160,
     borderRadius: 14,

@@ -6,6 +6,17 @@ import type { Item, Track } from '@/types/models';
 
 export type PullPhase = 'idle' | 'windy' | 'resolving' | 'landed';
 
+// Shared with ScrapNote.tsx so its Reanimated timings stay in lockstep with
+// this orchestration. The resolving stage reads: pin pops loose, then the
+// note glides to board-center and grows, then it fades out right as
+// claimChallenge() mounts ChallengeTicket (which plays its own entrance
+// animation) at that same spot — a hand-off, not a hard cut.
+export const WINDY_MS = 3000;
+export const PIN_POP_MS = 550;
+export const MOVE_MS = 900;
+export const FADE_MS = 300;
+const LANDED_MS = 500;
+
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -25,17 +36,19 @@ export function useBoardPullAnimation(onLanded?: () => void) {
 
       setWinnerId(winner.id);
       setPhase('windy');
-      await delay(1100);
+      await delay(WINDY_MS);
 
       setPhase('resolving');
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      await delay(370 + 700 + 150);
+      await delay(PIN_POP_MS + MOVE_MS);
 
       await claimChallenge(track, winner.id);
-      setPhase('landed');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       onLanded?.();
-      await delay(500);
+      await delay(FADE_MS);
+
+      setPhase('landed');
+      await delay(LANDED_MS);
 
       setPhase('idle');
       setWinnerId(null);

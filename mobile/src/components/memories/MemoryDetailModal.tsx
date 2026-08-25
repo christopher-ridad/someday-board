@@ -25,12 +25,12 @@ export function MemoryDetailModal({ item, onClose }: Props) {
     <Modal visible={item !== null} animationType="slide" onRequestClose={onClose}>
       <ThemedView style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
-          <PressableScale style={styles.closeButton} onPress={onClose} hitSlop={8}>
-            <ThemedText style={styles.closeText}>×</ThemedText>
-          </PressableScale>
           <ScrollView contentContainerStyle={styles.content}>
             <View style={styles.photoWrap}>
               <MemoryPhoto photoUrl={photoUrl} rating={memory?.rating} imageStyle={styles.photo} emojiStyle={styles.placeholderEmoji} />
+              <PressableScale style={styles.closeButton} onPress={onClose} hitSlop={12}>
+                <ThemedText style={styles.closeText}>×</ThemedText>
+              </PressableScale>
             </View>
             <ThemedText type="title" style={styles.title}>
               {item?.text}
@@ -52,9 +52,7 @@ export function MemoryDetailModal({ item, onClose }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1 },
-  closeButton: { alignSelf: 'flex-end', padding: 16 },
-  closeText: { fontSize: 28, lineHeight: 30 },
-  content: { paddingHorizontal: 20, paddingBottom: 40, gap: 10 },
+  content: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 40, gap: 10 },
   photoWrap: {
     width: '100%',
     aspectRatio: 1,
@@ -64,6 +62,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  // Floats over the photo's corner instead of sitting in its own header row
+  // — a dedicated row above the photo left an empty strip of nothing next
+  // to a lone ×. A small dark scrim keeps it legible over any photo without
+  // reading as a heavy UI button.
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.32)',
+  },
+  closeText: { fontSize: 20, lineHeight: 22, color: '#fff' },
   photo: { width: '100%', height: '100%' },
   placeholderEmoji: { fontSize: 48, lineHeight: 56 },
   title: { fontSize: 24, lineHeight: 28, marginTop: 8 },

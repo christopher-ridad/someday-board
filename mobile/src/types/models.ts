@@ -9,6 +9,8 @@ export interface Item {
   created_at: string;
   position_x: number | null;
   position_y: number | null;
+  rotation: number | null;
+  track: Track;
   claimed_track: Track | null;
   claimed_at: string | null;
   claimed_due_by: string | null;

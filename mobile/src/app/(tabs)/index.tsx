@@ -12,7 +12,7 @@ import { MemoryModal } from '@/components/memories/MemoryModal';
 import { ConfettiBurst } from '@/components/ui/ConfettiBurst';
 import { CorkBackground } from '@/components/ui/CorkBackground';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { poolForTrack, useBoardStore } from '@/store/useBoardStore';
+import { isTrackClaimed, poolForTrack, useBoardStore } from '@/store/useBoardStore';
 import type { Track } from '@/types/models';
 
 export default function BoardScreen() {
@@ -25,10 +25,26 @@ export default function BoardScreen() {
   const confettiRef = useRef<Explosion>(null);
   const { phase, winnerId, pulling, pull } = useBoardPullAnimation(() => confettiRef.current?.start());
 
-  const pool = useMemo(() => poolForTrack(items), [items]);
+  // Completed items move to (and stay in) Memories rather than piling up
+  // here indefinitely — the board only ever shows what's still pending, so
+  // it doesn't get more crowded the longer you use the app.
+  const pendingItems = useMemo(() => items.filter((i) => !i.done), [items]);
+  // Week and Month are separate boards — each only shows the items
+  // belonging to that track, not just a shared pull pool filtered by it.
+  const pendingTrackItems = useMemo(() => pendingItems.filter((i) => i.track === activeTrack), [pendingItems, activeTrack]);
+  const pool = useMemo(() => poolForTrack(items, activeTrack), [items, activeTrack]);
   const currentChallenge = useMemo(() => items.find((i) => i.claimed_track === activeTrack) ?? null, [items, activeTrack]);
-  const weekClaimed = useMemo(() => items.some((i) => i.claimed_track === 'week'), [items]);
-  const monthClaimed = useMemo(() => items.some((i) => i.claimed_track === 'month'), [items]);
+  const weekClaimed = useMemo(() => isTrackClaimed(items, 'week'), [items]);
+  const monthClaimed = useMemo(() => isTrackClaimed(items, 'month'), [items]);
+
+  // Colors cycle through the palette in pending-note order — that way notes
+  // pinned one after another never repeat a color.
+  const colorIndexById = useMemo(() => {
+    const map = new Map<string, number>();
+    let i = 0;
+    for (const item of pendingTrackItems) map.set(item.id, i++);
+    return map;
+  }, [pendingTrackItems]);
 
   function onLayout(e: LayoutChangeEvent) {
     const { width, height } = e.nativeEvent.layout;
@@ -51,6 +67,9 @@ export default function BoardScreen() {
   const handleDragEnd = useCallback((itemId: string, xPct: number, yPct: number) => {
     useBoardStore.getState().updatePosition(itemId, xPct, yPct);
   }, []);
+  const handleRotateEnd = useCallback((itemId: string, degrees: number) => {
+    useBoardStore.getState().updateRotation(itemId, degrees);
+  }, []);
   const handleOpenDetail = useCallback((itemId: string) => setDetailItemId(itemId), []);
 
   return (
@@ -65,24 +84,31 @@ export default function BoardScreen() {
         />
 
         <View style={styles.board} onLayout={onLayout}>
-          {items.length > 0 &&
-            boardSize.width > 0 && (
-              <View style={[styles.notes, currentChallenge && styles.notesDimmed]}>
-                {items.map((item) => (
-                  <ScrapNote
-                    key={item.id}
-                    item={item}
-                    boardWidth={boardSize.width}
-                    boardHeight={boardSize.height}
-                    phase={phase}
-                    winnerId={winnerId}
-                    dragDisabled={pulling}
-                    onDragEnd={handleDragEnd}
-                    onPress={handleOpenDetail}
-                  />
-                ))}
-              </View>
-            )}
+          {/* Every item stays mounted regardless of which track is active —
+              only visible toggles. Unmounting/remounting a note tears down
+              and rebuilds its native gesture recognizers, and doing that
+              for every note at once on every tab switch is what made
+              toggling feel slow; a style flip is instant. */}
+          {pendingItems.length > 0 && boardSize.width > 0 && (
+            <View style={[styles.notes, currentChallenge && styles.notesDimmed]}>
+              {pendingItems.map((item) => (
+                <ScrapNote
+                  key={item.id}
+                  item={item}
+                  visible={item.track === activeTrack}
+                  colorIndex={colorIndexById.get(item.id) ?? 0}
+                  boardWidth={boardSize.width}
+                  boardHeight={boardSize.height}
+                  phase={phase}
+                  winnerId={winnerId}
+                  dragDisabled={pulling}
+                  onDragEnd={handleDragEnd}
+                  onRotateEnd={handleRotateEnd}
+                  onPress={handleOpenDetail}
+                />
+              ))}
+            </View>
+          )}
 
           {currentChallenge ? (
             <ChallengeTicket
@@ -100,9 +126,9 @@ export default function BoardScreen() {
           )}
         </View>
 
-        {items.length === 0 && (
+        {pendingTrackItems.length === 0 && (
           <EmptyState emoji="🍂" style={StyleSheet.absoluteFill}>
-            {'Nothing on the board yet.\nAdd something you keep putting off.'}
+            {`Nothing on your ${activeTrack} board yet.\nAdd something you could do this ${activeTrack}.`}
           </EmptyState>
         )}
       </View>

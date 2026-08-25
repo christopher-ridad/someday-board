@@ -14,10 +14,15 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const items = useBoardStore((state) => state.items);
   const loadItems = useBoardStore((state) => state.loadItems);
+  const loadAllMemories = useBoardStore((state) => state.loadAllMemories);
 
   useEffect(() => {
     loadItems();
-  }, [loadItems]);
+    // So the Memories grid can sort by actual completion time (not item
+    // add-order) the moment it's first opened, not after a per-card lazy
+    // fetch finally resolves.
+    loadAllMemories();
+  }, [loadItems, loadAllMemories]);
 
   const pending = items.filter((i) => !i.done).length;
   const done = items.filter((i) => i.done).length;

@@ -35,6 +35,21 @@ export const NoteColors = [
   '#E4007C', // Poptimistic — fuchsia
   '#FFC4E1', // Sweet Sprinkles — cotton candy pink
 ];
+
+// Perceived-brightness formula (the standard trick for picking readable
+// black-vs-white text over an arbitrary background color): the palette
+// spans neon pastels through saturated blue/red/teal/fuchsia, so a single
+// hardcoded text color reads fine on the light ones and unreadable on the
+// dark ones — this picks per-color instead.
+function isLightColor(hex: string): boolean {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150;
+}
+
+export const NoteTextColors = NoteColors.map((hex) => (isLightColor(hex) ? '#3A2A1C' : '#FFFBF5'));
+
 export const Ratings = ['😐', '🙂', '😄', '🤩', '🏆'];
 export const PinColors = ['#D64545', '#EDA426', '#B9BCC2', '#8C9B65', '#5B7FA6'];
 export const Gold = '#8C9B65';
