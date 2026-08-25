@@ -1,0 +1,36 @@
+name: Refresh TestFlight build
+
+# TestFlight builds expire ~90 days after submission. This runs well inside
+# that window so the app never quietly goes stale, and can also be triggered
+# by hand from the Actions tab if a build is needed sooner (e.g. after a
+# native config change).
+on:
+  schedule:
+    - cron: '0 12 1 * *'
+  workflow_dispatch: {}
+
+jobs:
+  build-and-submit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - run: npm ci
+
+      - name: Build iOS
+        run: eas build --platform ios --profile production --non-interactive --wait
+
+      - name: Submit to TestFlight
+        run: eas submit --platform ios --profile production --latest --non-interactive
