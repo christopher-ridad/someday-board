@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { FlatList, StyleSheet, TextInput, View } from 'react-native';
 
 import { TrackToggle } from '@/components/board/TrackToggle';
+import { EditItemModal } from '@/components/list/EditItemModal';
 import { ItemRow } from '@/components/list/ItemRow';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Fonts, Gold, NoteColors } from '@/constants/theme';
@@ -18,6 +19,7 @@ export default function ListScreen() {
   const deleteItem = useBoardStore((state) => state.deleteItem);
   const [text, setText] = useState('');
   const [activeTrack, setActiveTrack] = useState<Track>('week');
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
 
   const pending = useMemo(() => items.filter((i) => !i.done && i.track === activeTrack), [items, activeTrack]);
   const weekClaimed = useMemo(() => isTrackClaimed(items, 'week'), [items]);
@@ -63,7 +65,12 @@ export default function ListScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.list}
             renderItem={({ item, index }: { item: Item; index: number }) => (
-              <ItemRow item={item} dotColor={NoteColors[index % NoteColors.length]} onDelete={() => deleteItem(item.id)} />
+              <ItemRow
+                item={item}
+                dotColor={NoteColors[index % NoteColors.length]}
+                onPress={() => setEditingItem(item)}
+                onDelete={() => deleteItem(item.id)}
+              />
             )}
           />
         )}
@@ -74,6 +81,7 @@ export default function ListScreen() {
           </EmptyState>
         )}
       </DismissKeyboardView>
+      <EditItemModal item={editingItem} onClose={() => setEditingItem(null)} />
     </CorkBackground>
   );
 }

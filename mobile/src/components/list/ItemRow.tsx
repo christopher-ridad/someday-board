@@ -9,12 +9,13 @@ import type { Item } from '@/types/models';
 interface Props {
   item: Item;
   dotColor: string;
+  onPress: () => void;
   onDelete: () => void;
 }
 
-export function ItemRow({ item, dotColor, onDelete }: Props) {
+export function ItemRow({ item, dotColor, onPress, onDelete }: Props) {
   return (
-    <View style={styles.row}>
+    <PressableScale style={styles.row} onPress={onPress}>
       <View style={[styles.dot, { backgroundColor: dotColor }]} />
       <ThemedText style={styles.text} numberOfLines={2}>
         {item.text}
@@ -38,7 +39,7 @@ export function ItemRow({ item, dotColor, onDelete }: Props) {
           </ThemedText>
         </PressableScale>
       )}
-    </View>
+    </PressableScale>
   );
 }
 

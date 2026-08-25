@@ -22,6 +22,7 @@ interface BoardState {
   loadItems: () => Promise<void>;
   loadAllMemories: () => Promise<void>;
   addItem: (text: string, track: Track) => Promise<void>;
+  updateItem: (id: string, patch: { text?: string; track?: Track }) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   updatePosition: (id: string, xPct: number, yPct: number) => Promise<void>;
   updateRotation: (id: string, degrees: number) => Promise<void>;
@@ -94,6 +95,31 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     const { data, error } = await supabase.from('items').insert({ text, track, position_x: x, position_y: y }).select().single();
     if (error) throw error;
     set((state) => ({ items: [...state.items, data as Item] }));
+  },
+
+  updateItem: async (id, patch) => {
+    const current = get().items.find((i) => i.id === id);
+    if (!current) return;
+
+    const fullPatch: Partial<Item> = { ...patch };
+    // Moving to a different board — re-place it with clearance from that
+    // board's other notes instead of carrying over a position that was
+    // only ever meaningful relative to the old one.
+    if (patch.track && patch.track !== current.track) {
+      const existing = get()
+        .items.filter((i) => i.id !== id && i.track === patch.track && !i.done)
+        .map((i) => {
+          const layout = scrapStyle(i.id);
+          return { x: i.position_x ?? layout.x, y: i.position_y ?? layout.y };
+        });
+      const { x, y } = placeNewNote(existing);
+      fullPatch.position_x = x;
+      fullPatch.position_y = y;
+    }
+
+    set((state) => ({ items: patchItem(state.items, id, fullPatch) }));
+    const { error } = await supabase.from('items').update(fullPatch).eq('id', id);
+    if (error) throw error;
   },
 
   deleteItem: async (id) => {
