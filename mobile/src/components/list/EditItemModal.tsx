@@ -6,7 +6,8 @@ import { TrackToggle } from '@/components/board/TrackToggle';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PressableScale } from '@/components/ui/PressableScale';
-import { Colors, Fonts, Gold } from '@/constants/theme';
+import { sheetStyles } from '@/components/ui/sheetStyles';
+import { Colors, Fonts } from '@/constants/theme';
 import { useBoardStore } from '@/store/useBoardStore';
 import type { Item, Track } from '@/types/models';
 
@@ -48,10 +49,10 @@ export function EditItemModal({ item, onClose }: Props) {
 
   return (
     <Modal visible={item !== null} animationType="slide" transparent onRequestClose={onClose}>
-      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ThemedView style={styles.sheet}>
-          <SafeAreaView edges={['bottom']} style={styles.content}>
-            <ThemedText type="title" style={styles.title}>
+      <KeyboardAvoidingView style={sheetStyles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ThemedView style={sheetStyles.sheet}>
+          <SafeAreaView edges={['bottom']} style={sheetStyles.content}>
+            <ThemedText type="title" style={sheetStyles.title}>
               Edit item
             </ThemedText>
 
@@ -70,12 +71,12 @@ export function EditItemModal({ item, onClose }: Props) {
                 longer belongs to. */}
             <TrackToggle track={track} onChange={setTrack} weekClaimed={false} monthClaimed={false} disabled={!!item?.claimed_track} />
 
-            <View style={styles.actions}>
-              <PressableScale style={styles.cancelButton} onPress={onClose}>
+            <View style={sheetStyles.actions}>
+              <PressableScale style={sheetStyles.ghostButton} onPress={onClose}>
                 <ThemedText>Cancel</ThemedText>
               </PressableScale>
-              <PressableScale style={styles.saveButton} onPress={onSave} disabled={saving || !text.trim()}>
-                <ThemedText style={styles.saveButtonText}>Save</ThemedText>
+              <PressableScale style={sheetStyles.primaryButton} onPress={onSave} disabled={saving || !text.trim()}>
+                <ThemedText style={sheetStyles.primaryButtonText}>Save</ThemedText>
               </PressableScale>
             </View>
           </SafeAreaView>
@@ -86,10 +87,6 @@ export function EditItemModal({ item, onClose }: Props) {
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24 },
-  content: { padding: 20, gap: 14 },
-  title: { fontSize: 22, lineHeight: 26 },
   input: {
     borderWidth: 1,
     borderColor: Colors.light.backgroundSelected,
@@ -101,8 +98,4 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     textAlignVertical: 'top',
   },
-  actions: { flexDirection: 'row', gap: 12, marginTop: 4 },
-  cancelButton: { flex: 1, alignItems: 'center', paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: Colors.light.backgroundSelected },
-  saveButton: { flex: 1, alignItems: 'center', paddingVertical: 14, borderRadius: 12, backgroundColor: Gold },
-  saveButtonText: { color: '#fff', fontFamily: Fonts.bodySemiBold },
 });

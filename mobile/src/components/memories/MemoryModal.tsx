@@ -19,7 +19,8 @@ import { RatingPicker } from '@/components/memories/RatingPicker';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PressableScale } from '@/components/ui/PressableScale';
-import { Colors, Fonts, Gold } from '@/constants/theme';
+import { sheetStyles } from '@/components/ui/sheetStyles';
+import { Colors, Fonts } from '@/constants/theme';
 import { useBoardStore } from '@/store/useBoardStore';
 
 interface Props {
@@ -109,15 +110,15 @@ export function MemoryModal({ itemId, itemText, onClose, onSaved }: Props) {
 
   return (
     <Modal visible={itemId !== null} animationType="slide" transparent onRequestClose={close}>
-      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ThemedView style={styles.sheet}>
+      <KeyboardAvoidingView style={sheetStyles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ThemedView style={[sheetStyles.sheet, styles.sheetTall]}>
           <SafeAreaView edges={['bottom']}>
-            {/* Bounded by sheet's maxHeight so this can actually scroll —
-                without it, the sheet just grows to fit its content and the
-                note input + Save button end up pushed off-screen under the
-                keyboard with no way to reach them. */}
-            <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-              <ThemedText type="title" style={styles.title}>
+            {/* Bounded by the sheet's maxHeight so this can actually
+                scroll — without it, the sheet just grows to fit its
+                content and the note input + Save button end up pushed
+                off-screen under the keyboard with no way to reach them. */}
+            <ScrollView contentContainerStyle={sheetStyles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              <ThemedText type="title" style={sheetStyles.title}>
                 Log this memory
               </ThemedText>
               <ThemedText themeColor="textSecondary" style={styles.subtitle}>
@@ -143,12 +144,12 @@ export function MemoryModal({ itemId, itemText, onClose, onSaved }: Props) {
 
               <RatingPicker value={rating} onChange={setRating} />
 
-              <View style={styles.actions}>
-                <PressableScale style={styles.ghostButton} onPress={close}>
+              <View style={sheetStyles.actions}>
+                <PressableScale style={sheetStyles.ghostButton} onPress={close}>
                   <ThemedText>Cancel</ThemedText>
                 </PressableScale>
-                <PressableScale style={styles.saveButton} onPress={onSave} disabled={saving}>
-                  {saving ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.saveButtonText}>Save memory</ThemedText>}
+                <PressableScale style={sheetStyles.primaryButton} onPress={onSave} disabled={saving}>
+                  {saving ? <ActivityIndicator color="#fff" /> : <ThemedText style={sheetStyles.primaryButtonText}>Save memory</ThemedText>}
                 </PressableScale>
               </View>
             </ScrollView>
@@ -160,10 +161,7 @@ export function MemoryModal({ itemId, itemText, onClose, onSaved }: Props) {
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  sheet: { maxHeight: '85%', borderTopLeftRadius: 24, borderTopRightRadius: 24 },
-  content: { padding: 20, gap: 14 },
-  title: { fontSize: 22, lineHeight: 26 },
+  sheetTall: { maxHeight: '85%' },
   subtitle: { marginTop: -6 },
   // A portrait aspect ratio (matching a typical phone photo) instead of a
   // short fixed height — with "contain" keeping the whole picture visible,
@@ -195,8 +193,4 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     textAlignVertical: 'top',
   },
-  actions: { flexDirection: 'row', gap: 12, marginTop: 4 },
-  ghostButton: { flex: 1, alignItems: 'center', paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: Colors.light.backgroundSelected },
-  saveButton: { flex: 1, alignItems: 'center', paddingVertical: 14, borderRadius: 12, backgroundColor: Gold },
-  saveButtonText: { color: '#fff', fontFamily: Fonts.bodySemiBold },
 });
