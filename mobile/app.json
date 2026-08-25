@@ -7,6 +7,13 @@
     "icon": "./assets/images/icon.png",
     "scheme": "somedayboard",
     "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.christopherridad.somedayboard",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#C29C6E",
@@ -14,7 +21,10 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -42,6 +52,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": false
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "27128ef6-28d8-4165-9453-91067b3d8c20"
+      }
+    },
+    "owner": "christopher-ridad"
   }
 }
