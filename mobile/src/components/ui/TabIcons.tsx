@@ -38,3 +38,15 @@ export function MemoriesIcon({ color, size = 24 }: IconProps) {
     </Svg>
   );
 }
+
+export function GearIcon({ color, size = 22 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8}>
+      <Circle cx={12} cy={12} r={3} />
+      <Path
+        d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}

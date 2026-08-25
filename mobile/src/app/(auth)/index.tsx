@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { CorkBackground } from '@/components/ui/CorkBackground';
+import { DismissKeyboardView } from '@/components/ui/DismissKeyboardView';
 import { PressableScale } from '@/components/ui/PressableScale';
 import { Colors, Fonts, Gold } from '@/constants/theme';
 import { sendSignInCode, verifySignInCode } from '@/lib/auth';
@@ -46,13 +47,16 @@ export default function SignInScreen() {
 
   return (
     <CorkBackground style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title" style={styles.title}>
-          Someday Board
-        </ThemedText>
-        <ThemedText themeColor="textSecondary" style={styles.subtitle}>
-          A scrapbook wall for the things you keep putting off.
-        </ThemedText>
+      <DismissKeyboardView style={styles.dismissWrap}>
+        <SafeAreaView style={styles.safeArea}>
+        <View style={styles.titleCard}>
+          <ThemedText type="title" style={styles.title}>
+            Someday Board
+          </ThemedText>
+          <ThemedText themeColor="textSecondary" style={styles.subtitle}>
+            A scrapbook wall for the things you keep putting off.
+          </ThemedText>
+        </View>
 
         <View style={styles.card}>
           {!sent ? (
@@ -78,8 +82,6 @@ export default function SignInScreen() {
               <TextInput
                 value={code}
                 onChangeText={setCode}
-                placeholder="code from email"
-                placeholderTextColor={Colors.light.textSecondary}
                 keyboardType="number-pad"
                 style={[styles.input, styles.codeInput]}
               />
@@ -95,16 +97,35 @@ export default function SignInScreen() {
             </>
           )}
         </View>
-      </SafeAreaView>
+        </SafeAreaView>
+      </DismissKeyboardView>
     </CorkBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  dismissWrap: { flex: 1 },
   safeArea: { flex: 1, justifyContent: 'center', paddingHorizontal: 28 },
+  // A card behind the title/subtitle instead of setting them directly on
+  // the cork texture — dark brown text on a brown/orange photo background
+  // has poor contrast and was hard to read, especially the muted subtitle.
+  titleCard: {
+    marginBottom: 24,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(255,251,245,0.9)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(196,178,138,0.4)',
+    shadowColor: '#4A2A1C',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
   title: { textAlign: 'center', fontSize: 34, lineHeight: 38, transform: [{ rotate: '-1deg' }] },
-  subtitle: { textAlign: 'center', marginTop: 6, marginBottom: 24 },
+  subtitle: { textAlign: 'center', marginTop: 6 },
   card: {
     gap: 16,
     padding: 24,

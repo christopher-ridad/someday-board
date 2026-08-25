@@ -6,6 +6,7 @@ import { ItemRow } from '@/components/list/ItemRow';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Fonts, Gold, NoteColors } from '@/constants/theme';
 import { CorkBackground } from '@/components/ui/CorkBackground';
+import { DismissKeyboardView } from '@/components/ui/DismissKeyboardView';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PressableScale } from '@/components/ui/PressableScale';
 import { isTrackClaimed, useBoardStore } from '@/store/useBoardStore';
@@ -31,7 +32,7 @@ export default function ListScreen() {
 
   return (
     <CorkBackground style={styles.container}>
-      <View style={styles.safeArea}>
+      <DismissKeyboardView style={styles.safeArea}>
         <TrackToggle
           track={activeTrack}
           onChange={setActiveTrack}
@@ -72,7 +73,7 @@ export default function ListScreen() {
             {`Nothing on your ${activeTrack} list yet.\nAdd the thing you've been putting off.`}
           </EmptyState>
         )}
-      </View>
+      </DismissKeyboardView>
     </CorkBackground>
   );
 }

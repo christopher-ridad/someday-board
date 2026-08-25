@@ -1,11 +1,13 @@
 import { Tabs } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
+import { AccountModal } from '@/components/ui/AccountModal';
 import { CorkBackground } from '@/components/ui/CorkBackground';
-import { BoardIcon, ListIcon, MemoriesIcon } from '@/components/ui/TabIcons';
+import { PressableScale } from '@/components/ui/PressableScale';
+import { BoardIcon, GearIcon, ListIcon, MemoriesIcon } from '@/components/ui/TabIcons';
 import { Colors, Gold } from '@/constants/theme';
 import { useBoardStore } from '@/store/useBoardStore';
 
@@ -15,6 +17,7 @@ export default function TabsLayout() {
   const items = useBoardStore((state) => state.items);
   const loadItems = useBoardStore((state) => state.loadItems);
   const loadAllMemories = useBoardStore((state) => state.loadAllMemories);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   useEffect(() => {
     loadItems();
@@ -33,6 +36,9 @@ export default function TabsLayout() {
     <CorkBackground style={styles.container}>
       <SafeAreaView edges={['top']}>
         <View style={styles.header}>
+          <PressableScale style={styles.accountButton} onPress={() => setAccountOpen(true)} hitSlop={12}>
+            <GearIcon color={Colors.light.textSecondary} size={20} />
+          </PressableScale>
           <View style={styles.eyebrowRow}>
             <View style={styles.eyebrowDash} />
             <ThemedText type="label" style={styles.eyebrow}>
@@ -65,12 +71,26 @@ export default function TabsLayout() {
         <Tabs.Screen name="list" options={{ title: 'List', tabBarIcon: ({ color }) => <ListIcon color={color} /> }} />
         <Tabs.Screen name="memories" options={{ title: 'Memories', tabBarIcon: ({ color }) => <MemoriesIcon color={color} /> }} />
       </Tabs>
+
+      <AccountModal visible={accountOpen} onClose={() => setAccountOpen(false)} />
     </CorkBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  // A bigger tap target than the icon itself looks, matching the app's
+  // 44pt-ish minimum elsewhere — a small icon alone is easy to miss/mistap.
+  accountButton: {
+    position: 'absolute',
+    top: 6,
+    right: 10,
+    zIndex: 1,
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   header: {
     marginHorizontal: 14,
     marginTop: 12,

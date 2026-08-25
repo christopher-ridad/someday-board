@@ -1,6 +1,18 @@
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RatingPicker } from '@/components/memories/RatingPicker';
@@ -49,6 +61,21 @@ export function MemoryModal({ itemId, itemText, onClose, onSaved }: Props) {
   const [note, setNote] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  // Shrinks the photo preview while the keyboard's up, so the note field
+  // and Save button stay in view without scrolling — the portrait-shaped
+  // photo box (needed to show photos without letterboxing) is tall enough
+  // that, combined with the keyboard, reaching them otherwise required a
+  // scroll every time.
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   function reset() {
     setRating(null);
@@ -97,7 +124,7 @@ export function MemoryModal({ itemId, itemText, onClose, onSaved }: Props) {
                 {itemText}
               </ThemedText>
 
-              <PressableScale style={styles.photoBox} onPress={onPickPhoto}>
+              <PressableScale style={[styles.photoBox, keyboardVisible && styles.photoBoxCompact]} onPress={onPickPhoto}>
                 {photoUri ? (
                   <Image source={{ uri: photoUri }} style={styles.photo} resizeMode="contain" />
                 ) : (
@@ -138,11 +165,13 @@ const styles = StyleSheet.create({
   content: { padding: 20, gap: 14 },
   title: { fontSize: 22, lineHeight: 26 },
   subtitle: { marginTop: -6 },
-  // Photo can be any aspect ratio the camera/library gives us — "contain"
-  // (not the default "cover") is what keeps the whole picture visible
-  // instead of cropping it to fill this fixed-height box.
+  // A portrait aspect ratio (matching a typical phone photo) instead of a
+  // short fixed height — with "contain" keeping the whole picture visible,
+  // a box shaped nothing like the photo just let it show up tiny and
+  // letterboxed in the middle. This isn't a perfect match for every photo's
+  // exact ratio, but it's close enough that most fill the box almost fully.
   photoBox: {
-    height: 160,
+    aspectRatio: 3 / 4,
     borderRadius: 14,
     borderWidth: 1,
     borderColor: Colors.light.backgroundSelected,
@@ -150,6 +179,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  // aspectRatio explicitly cleared, not just left alone — height and
+  // aspectRatio both being set at once is ambiguous, so the earlier value
+  // needs to be unset rather than just outweighed.
+  photoBoxCompact: { aspectRatio: undefined, height: 90 },
   photo: { width: '100%', height: '100%' },
   noteInput: {
     borderWidth: 1,
