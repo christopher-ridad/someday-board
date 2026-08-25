@@ -1,16 +1,30 @@
+import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Crypto from 'expo-crypto';
+
 import { supabase } from '@/lib/supabase';
 
-// Sends a one-time 6-digit code to the given email (the Magic Link template
-// must include {{ .Token }} for the email to actually show a code). Using a
-// typed-in code instead of a clickable deep link sidesteps Expo Go's
-// cold-start deep-linking limitation entirely — no app handoff, no redirect
-// URL allow-listing needed.
-export async function sendSignInCode(email: string) {
-  const { error } = await supabase.auth.signInWithOtp({ email });
-  if (error) throw error;
-}
+// Apple's native sign-in flow: get an identity token directly from Apple
+// (Face ID/Touch ID, no browser redirect or typed code), then hand it to
+// Supabase. A random nonce, hashed before being sent to Apple and passed
+// back unhashed to Supabase, is what lets Supabase verify the token came
+// from this exact sign-in attempt rather than being replayed from another.
+export async function signInWithApple() {
+  const rawNonce = Crypto.randomUUID();
+  const hashedNonce = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, rawNonce);
 
-export async function verifySignInCode(email: string, token: string) {
-  const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
+  const credential = await AppleAuthentication.signInAsync({
+    requestedScopes: [AppleAuthentication.AppleAuthenticationScope.FULL_NAME, AppleAuthentication.AppleAuthenticationScope.EMAIL],
+    nonce: hashedNonce,
+  });
+
+  if (!credential.identityToken) {
+    throw new Error('Apple sign-in did not return an identity token.');
+  }
+
+  const { error } = await supabase.auth.signInWithIdToken({
+    provider: 'apple',
+    token: credential.identityToken,
+    nonce: rawNonce,
+  });
   if (error) throw error;
 }

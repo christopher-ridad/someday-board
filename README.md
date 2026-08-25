@@ -2,7 +2,7 @@
 
 A scrapbook wall for the things you keep putting off. Pin things up, pull one off the board each week/month, and turn it into a photo memory once it's done.
 
-A native Expo/React Native app backed by Supabase, built for testing on a real iPhone via Expo Go without needing a Mac. Everything lives in [`mobile/`](mobile/).
+A native Expo/React Native app backed by Supabase. Built from Windows with no Mac — day-to-day development uses Expo Go for fast iteration, and real builds are distributed via TestFlight using EAS Build (which compiles the signed binary in Expo's cloud, no Mac required for that either). Everything lives in [`mobile/`](mobile/).
 
 (An earlier version of this project was a vanilla HTML/CSS/JS PWA with no backend. It's been fully replaced by the app described below; its history is still in git if you ever want to look back at it.)
 
@@ -21,9 +21,9 @@ cp .env.example .env
 
 Fill in `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` from your project's Settings → API page.
 
-**4. Show the sign-in code in the email.** In the Supabase dashboard, go to Authentication → Email Templates → Magic Link, and add `{{ .Token }}` somewhere in the email body — that's the 6-digit code the app's sign-in screen asks you to type in.
-
-(An earlier version of this app used a clickable magic-link deep link instead. That turned out to be a dead end specifically under Expo Go: cold-launching the app via a deep link drops the URL's path/query entirely — a real Expo Go limitation, not something fixable in app code — so a typed-in code is used instead. No redirect URL configuration is needed at all with this approach.)
+**4. Turn on Sign in with Apple.** Two places:
+   - **Apple Developer portal** → Certificates, Identifiers & Profiles → Identifiers → your app's App ID → enable the "Sign In with Apple" capability.
+   - **Supabase dashboard** → Authentication → Providers → Apple → enable it, and register your app's bundle identifier (e.g. `com.yourname.somedayboard`) as an authorized client ID. This is the *native* flow (no Services ID or redirect URL needed) — the app gets a signed identity token straight from Apple's SDK and hands it to Supabase.
 
 **5. Install dependencies and start the dev server.**
 
@@ -37,7 +37,9 @@ Scan the QR code with your iPhone's camera (opens in Expo Go — install it from
 
 ## How auth works here
 
-Sign-in is passwordless: enter your email, Supabase sends a 6-digit code, you type it into the app. No deep link, no redirect URL, no app-switching — this was chosen specifically to avoid Expo Go's cold-start deep-linking limitation (see `mobile/src/lib/auth.ts`). Sessions persist across restarts via `AsyncStorage` and refresh automatically while the app is foregrounded (see `mobile/src/lib/supabase.ts`).
+Sign in with Apple, using Apple's native sign-in flow (`expo-apple-authentication`) rather than a web/OAuth redirect — one tap, Face ID, no email or code to type (see `mobile/src/lib/auth.ts`). This only works in a real build (Expo Go can't hold the Apple Sign In entitlement), which is part of why this project moved off Expo Go and onto TestFlight — see below. Sessions persist across restarts via `AsyncStorage` and refresh automatically while the app is foregrounded (see `mobile/src/lib/supabase.ts`).
+
+An earlier version used a typed-in 6-digit email code instead, specifically to route around Expo Go's cold-start deep-linking limitation (a plain clickable magic link didn't survive a cold app launch there). That's moot now that the app runs as a real build instead of through Expo Go.
 
 ## Project layout
 
@@ -52,5 +54,5 @@ Sign-in is passwordless: enter your email, Supabase sends a 6-digit code, you ty
 
 - This is built for personal, single-user use — RLS scopes every row to your own `auth.uid()`, but there's no multi-tenant UI beyond that.
 - Photos are resized/compressed client-side (max 640px, JPEG ~0.6 quality) before upload.
-- There's currently no distributable build — the app runs via Expo Go during development. Getting a real home-screen icon (via TestFlight) requires a paid Apple Developer account; ask if you want to set that up later.
+- Distributable builds go through EAS Build/Submit (`mobile/eas.json`) → TestFlight, which is how the app gets tested with a real home-screen icon instead of through Expo Go. Build with `eas build --platform ios --profile production`, then `eas submit --platform ios --profile production --latest`. This requires a paid Apple Developer account. Any change to native config (`app.json` plugins/entitlements, e.g. Sign in with Apple) needs a fresh build — a JS-only change doesn't.
 - **This project is intentionally pinned to Expo SDK 54, not latest.** SDK 57's Expo Go build was stuck in Apple App Store review with no ETA, so the project was downgraded to SDK 54 (what the public Expo Go app actually runs) to keep testing on a real iPhone without a paid Apple Developer account. Before upgrading, check whether Expo Go's App Store build has caught up.
