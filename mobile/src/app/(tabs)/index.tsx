@@ -12,11 +12,13 @@ import { MemoryModal } from '@/components/memories/MemoryModal';
 import { ConfettiBurst } from '@/components/ui/ConfettiBurst';
 import { CorkBackground } from '@/components/ui/CorkBackground';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { isTrackClaimed, poolForTrack, useBoardStore } from '@/store/useBoardStore';
 import type { Track } from '@/types/models';
 
 export default function BoardScreen() {
   const items = useBoardStore((state) => state.items);
+  const loading = useBoardStore((state) => state.loading);
   const releaseChallenge = useBoardStore((state) => state.releaseChallenge);
   const [activeTrack, setActiveTrack] = useState<Track>('week');
   const [boardSize, setBoardSize] = useState({ width: 0, height: 0 });
@@ -126,10 +128,14 @@ export default function BoardScreen() {
           )}
         </View>
 
-        {pendingTrackItems.length === 0 && (
-          <EmptyState emoji="🍂" style={StyleSheet.absoluteFill}>
-            {`Nothing on your ${activeTrack} board yet.\nAdd something you could do this ${activeTrack}.`}
-          </EmptyState>
+        {loading ? (
+          <LoadingState style={StyleSheet.absoluteFill} />
+        ) : (
+          pendingTrackItems.length === 0 && (
+            <EmptyState emoji="🍂" style={StyleSheet.absoluteFill}>
+              {`Nothing on your ${activeTrack} board yet.\nAdd something you could do this ${activeTrack}.`}
+            </EmptyState>
+          )
         )}
       </View>
 

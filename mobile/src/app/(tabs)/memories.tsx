@@ -6,12 +6,14 @@ import { MemoryDetailModal } from '@/components/memories/MemoryDetailModal';
 import { ThemedText } from '@/components/themed-text';
 import { CorkBackground } from '@/components/ui/CorkBackground';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { Colors, Gold } from '@/constants/theme';
 import { useBoardStore } from '@/store/useBoardStore';
 import type { Item } from '@/types/models';
 
 export default function MemoriesScreen() {
   const items = useBoardStore((state) => state.items);
+  const loading = useBoardStore((state) => state.loading);
   const memories = useBoardStore((state) => state.memories);
   const [detailItem, setDetailItem] = useState<Item | null>(null);
 
@@ -49,10 +51,14 @@ export default function MemoriesScreen() {
           />
         )}
 
-        {done.length === 0 && (
-          <EmptyState emoji="🎞️" style={StyleSheet.absoluteFill}>
-            {'No memories yet.\nPull one off the board and go make one.'}
-          </EmptyState>
+        {loading ? (
+          <LoadingState style={StyleSheet.absoluteFill} />
+        ) : (
+          done.length === 0 && (
+            <EmptyState emoji="🎞️" style={StyleSheet.absoluteFill}>
+              {'No memories yet.\nPull one off the board and go make one.'}
+            </EmptyState>
+          )
         )}
       </View>
       <MemoryDetailModal item={detailItem} onClose={() => setDetailItem(null)} />

@@ -9,12 +9,14 @@ import { Colors, Fonts, Gold, NoteColors } from '@/constants/theme';
 import { CorkBackground } from '@/components/ui/CorkBackground';
 import { DismissKeyboardView } from '@/components/ui/DismissKeyboardView';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { PressableScale } from '@/components/ui/PressableScale';
 import { isTrackClaimed, useBoardStore } from '@/store/useBoardStore';
 import type { Item, Track } from '@/types/models';
 
 export default function ListScreen() {
   const items = useBoardStore((state) => state.items);
+  const loading = useBoardStore((state) => state.loading);
   const addItem = useBoardStore((state) => state.addItem);
   const deleteItem = useBoardStore((state) => state.deleteItem);
   const [text, setText] = useState('');
@@ -75,10 +77,14 @@ export default function ListScreen() {
           />
         )}
 
-        {pending.length === 0 && (
-          <EmptyState emoji="📝" rotation={1} style={StyleSheet.absoluteFill}>
-            {`Nothing on your ${activeTrack} list yet.\nAdd the thing you've been putting off.`}
-          </EmptyState>
+        {loading ? (
+          <LoadingState style={StyleSheet.absoluteFill} />
+        ) : (
+          pending.length === 0 && (
+            <EmptyState emoji="📝" rotation={1} style={StyleSheet.absoluteFill}>
+              {`Nothing on your ${activeTrack} list yet.\nAdd the thing you've been putting off.`}
+            </EmptyState>
+          )
         )}
       </DismissKeyboardView>
       <EditItemModal item={editingItem} onClose={() => setEditingItem(null)} />
