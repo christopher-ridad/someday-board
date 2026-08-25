@@ -24,6 +24,7 @@ interface BoardState {
   addItem: (text: string, track: Track) => Promise<void>;
   updateItem: (id: string, patch: { text?: string; track?: Track }) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
+  restoreItem: (item: Item) => Promise<void>;
   updatePosition: (id: string, xPct: number, yPct: number) => Promise<void>;
   updateRotation: (id: string, degrees: number) => Promise<void>;
   claimChallenge: (track: Track, itemId: string) => Promise<void>;
@@ -126,6 +127,16 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     const { error } = await supabase.from('items').delete().eq('id', id);
     if (error) throw error;
     set((state) => ({ items: state.items.filter((i) => i.id !== id) }));
+  },
+
+  // Undoes a delete by re-inserting the exact same row (same id and all),
+  // rather than a confirm-before-delete prompt — deleting stays instant
+  // with no interruption, but a mistaken tap is still recoverable for a
+  // few seconds afterward (see the List screen's undo toast).
+  restoreItem: async (item) => {
+    const { error } = await supabase.from('items').insert(item);
+    if (error) throw error;
+    set((state) => ({ items: [...state.items, item] }));
   },
 
   updatePosition: async (id, xPct, yPct) => {
