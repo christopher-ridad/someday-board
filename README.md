@@ -4,7 +4,7 @@ A native iOS scrapbook wall for the things you keep putting off: pin items up, p
 
 **Status:** personal-use app, distributed to a small group via TestFlight (not on the public App Store).
 
-![Someday Board screenshot](media/board-screenshot.jpg)
+<img src="media/board-screenshot.jpg" alt="Someday Board screenshot" width="320" />
 
 ---
 
